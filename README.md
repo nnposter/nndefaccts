@@ -53,4 +53,4 @@ NNdefaccts is Copyright (c) 2012-2018 by nnposter (nnposter /at/ users.sourcefor
 
 NNdefaccts is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-For details see the full license at https://github.com/nnposter/nndefaccts/COPYING.
+For details see the full license at [COPYING](https://github.com/nnposter/nndefaccts/blob/master/COPYING).
