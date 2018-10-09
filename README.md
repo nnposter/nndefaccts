@@ -10,6 +10,8 @@ Nmap comes with its own default fingerprint dataset; there is no inherent necess
 
 To various degrees, checking for default credentials is possible with other well-recognized tools besides Nmap: Metasploit, OpenVAS, Nessus, Qualys, Nexpose, Acunetix, and similar. Based on our evaluation, Nmap with the NNdefaccts dataset is one of the best with respect to web interfaces. Compared to some, it is an order of magnitude difference.
 
+Besides good coverage, scanning for default usernames and passwords with Nmap and the NNdefaccts dataset is straightforward, lightweight, and fast. A target on a local network can be typically tested in less than 30 seconds from start to finish.
+
 ## Installation, Usage
 For simple one-off use, just copy file `http-default-accounts-fingerprints-nndefaccts.lua` to your home directory and, instead of running:
 ```
