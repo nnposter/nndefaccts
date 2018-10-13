@@ -2453,7 +2453,7 @@ table.insert(fingerprints, {
            and response.status == 200
            and response.body
            and response.body:find("isAPmode", 1, true)
-           and response.body:lower():find('<meta%f[%s][^>]-%sname%s*=%s*"description"%f[%s][^>]-%scontent%s*=%s*"%w+ 2307"')
+           and response.body:lower():find("<meta%f[%s][^>]-%sname%s*=%s*(['\"])description%1%f[%s][^>]-%scontent%s*=%s*(['\"])%w+ 2307%2")
   end,
   login_combos = {
     {username = "", password = ""}
@@ -3908,7 +3908,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and (response.header["server"] or ""):find("^lighttpd/%d+%.")
            and response.body
-           and response.body:find("Motorola", 1, true)
+           and response.body:find(">Motorola", 1, true)
            and response.body:lower():find("<title>motorola solutions</title>", 1, true)
   end,
   login_combos = {
@@ -3936,7 +3936,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and (response.header["server"] or ""):find("^thttpd/%d+%.")
            and response.body
-           and response.body:find("Motorola", 1, true)
+           and response.body:find(">Motorola", 1, true)
            and response.body:lower():find("<title>motorola wireless network management</title>", 1, true)
   end,
   login_combos = {
@@ -4016,7 +4016,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.header["server"] == "HTTP Server"
            and response.body
-           and response.body:find("Nortel", 1, true)
+           and response.body:find(">Nortel", 1, true)
            and response.body:lower():find("<title>nortel vpn router</title>", 1, true)
   end,
   login_combos = {
@@ -4448,7 +4448,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Polycom", 1, true)
            and response.body:find("submitLoginInfo", 1, true)
-           and response.body:lower():find('<title>polycom - configuration utility</title>', 1, true)
+           and response.body:lower():find("<title>polycom - configuration utility</title>", 1, true)
   end,
   login_combos = {
     {username = "Polycom", password = "456"},
@@ -4738,7 +4738,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Dedicated Micros", 1, true)
            and response.body:find("webpages/index.shtml", 1, true)
-           and response.body:lower():find('<meta%f[%s][^>]-%sname%s*=%s*"author"%f[%s][^>]-%scontent%s*=%s*"dedicated micros ')
+           and response.body:lower():find("<meta%f[%s][^>]-%sname%s*=%s*(['\"])author%1%f[%s][^>]-%scontent%s*=%s*['\"]dedicated micros ")
   end,
   login_combos = {
     {username = "dm", password = "web"}
@@ -4760,7 +4760,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Dedicated Micros", 1, true)
            and response.body:find("/gui/gui_outer_frame.shtml", 1, true)
-           and response.body:lower():find('<meta%f[%s][^>]-%sname%s*=%s*"author"%f[%s][^>]-%scontent%s*=%s*"dedicated micros ')
+           and response.body:lower():find("<meta%f[%s][^>]-%sname%s*=%s*(['\"])author%1%f[%s][^>]-%scontent%s*=%s*['\"]dedicated micros ")
   end,
   login_combos = {
     {username = "", password = ""}
@@ -7222,7 +7222,7 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 200
            and response.body
-           and response.body:find("iBoot", 1, true)
+           and response.body:find(">iBoot", 1, true)
            and response.body:lower():find("<title>iboot bar ", 1, true)
            and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)password%1")
   end,
