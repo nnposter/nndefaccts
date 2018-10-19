@@ -63,7 +63,7 @@ local have_rand, rand = pcall(require, "rand")
 ---
 
 ---
--- Deeply clone a table.
+-- Deeply clones a table.
 -- @param tbl Table to clone
 -- @return A clone of the original table with nested tables also cloned
 ---
@@ -918,6 +918,43 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "JBoss EAP Admin Console",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/admin-console/", 1, true)
+           and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"])[^'\"]-/admin%-console/%1")
+           and response.body:lower():find("<title>welcome to jboss", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local curl = url.absolute(path, "admin-console/")
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(curl, "secure/summary.seam"))
+    local lurl = resp1.header["location"]
+    if not (resp1.status == 302 and lurl) then return false end
+    local lpath = lurl:match("%f[/]/%f[^/].*")
+    local resp2 = http_get_simple(host, port, lpath)
+    if resp2.status ~= 200 then return false end
+    local form3 = {login_form="login_form",
+                   ["login_form:name"]=user,
+                   ["login_form:password"]=pass,
+                   ["login_form:submit"]="Login",
+                   ["javax.faces.ViewState"]="j_id1"}
+    local resp3 = http_post_simple(host, port, lpath:gsub("[;?].*$", ""),
+                                  {cookies=resp1.cookies}, form3)
+    return resp3.status == 302
+       and (resp3.header["location"] or ""):find("/admin-console/secure/summary.seam?conversationId=", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "JBoss JMX Console",
   cpe = "cpe:/a:redhat:jboss_enterprise_application_platform",
   category = "web",
@@ -936,6 +973,29 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, url.absolute(path, "jmx-console/"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "JBoss Web Console",
+  cpe = "cpe:/a:redhat:jboss_enterprise_web_platform",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/web-console/", 1, true)
+           and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"])[^'\"]-/web%-console/%1")
+           and response.body:lower():find("<title>welcome to jboss", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "web-console/"),
                         user, pass, false)
   end
 })
@@ -5970,6 +6030,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "OEM DVR",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("%Wdocument%.location%.replace%(%s*(['\"])mlogin%.cgi%1%s*%)%s*;")
+           and response.body:lower():find("<title>dvr login</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {c_userid=user,
+                  c_password=pass,
+                  c_target=2}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "direct_open_setup.cgi"),
+                                 nil, form)
+    return resp.status == 200
+           and (resp.body or ""):find("<script%f[%s][^>]-%ssrc%s*=%s*(['\"])setup%.js%1")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Samsung DVR",
   cpe = "cpe:/h:samsung:dvr",
   category = "security",
@@ -6038,6 +6125,36 @@ table.insert(fingerprints, {
                                  {auth=auth, header=header}, msg)
     return resp.status == 200
            and (resp.body or ""):find("<status>success</status>", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Xiongmai NETSurveillance",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("%Wlocation%s*=%s*(['\"])Login%.htm%1%s*;")
+           and response.body:find("%Wvar%s+gHashCookie%s*=%s*new%s+Hash%.Cookie%(%s*(['\"])NetSuveillanceWebCookie%1%s*,")
+  end,
+  login_combos = {
+    {username = "admin",   password = ""},
+    {username = "default", password = "tluafed"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local cookie = "NetSuveillanceWebCookie="
+                   .. url.escape(('{"username":"%s"}'):format(user))
+    local form = stdnse.output_table()
+    form.command = "login"
+    form.username = user
+    form.password = pass
+    local resp = http_post_simple(host, port, url.absolute(path, "Login.htm"),
+                                 {cookies=cookie}, form)
+    return resp.status == 200
+           and (resp.body or ""):match("%Wvar%s+g_user%s*=%s*['\"](.-)['\"]%s*;") == user
   end
 })
 
