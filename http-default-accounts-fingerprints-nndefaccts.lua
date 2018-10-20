@@ -3463,7 +3463,7 @@ table.insert(fingerprints, {
     local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return resp.status == 200
            and sets_cookie(resp, "sessionID", ".")
-           and resp.body:find("%Wwindow%.location%s*=%s*(['\"])mainFrame%.cgi%1")
+           and (resp.body or ""):find("%Wwindow%.location%s*=%s*(['\"])mainFrame%.cgi%1")
   end
 })
 
@@ -8811,8 +8811,9 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, path, nil,
                                  {slclogin=user, slcpassword=pass})
     return resp.status == 200
+           and resp.body
            and (resp.body:find("User already logged into web")
-            or (resp.body or ""):lower():find("<frame%f[%s][^>]-%sname%s*=%s*(['\"]?)data%1%f[%s][^>]-%ssrc%s*=%s*(['\"]?)home%.htm%2%s"))
+             or resp.body:lower():find("<frame%f[%s][^>]-%sname%s*=%s*(['\"]?)data%1%f[%s][^>]-%ssrc%s*=%s*(['\"]?)home%.htm%2%s"))
   end
 })
 
