@@ -1,4 +1,5 @@
-# NNDefaccts
+# NNdefaccts
+*[n-n-ˈdē-ˌfekts] (pun intended)*
 
 ## TL;DR
 [NNdefaccts](https://github.com/nnposter/nndefaccts/) is nnposter's alternate fingerprint dataset for Nmap script http-default-accounts.
@@ -27,6 +28,8 @@ For more permanent use, you might consider replacing the default fingerprint dat
 For help with running script http-default-accounts or Nmap in general, see https://nmap.org/.
 
 For issues specific to NNdefaccts, see below.
+
+:exclamation: **NOTE: nnposter will be out of reach till the end of November and unable to respond to any support issues until then.**
 
 ## Contributing
 Contributions are appreciated but please review the rest of the section first.
