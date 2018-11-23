@@ -29,8 +29,6 @@ For help with running script http-default-accounts or Nmap in general, see https
 
 For issues specific to NNdefaccts, see below.
 
-:exclamation: **NOTE: nnposter will be out of reach till the end of November and unable to respond to any support issues until then.**
-
 ## Contributing
 Contributions are appreciated but please review the rest of the section first.
 
