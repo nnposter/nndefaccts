@@ -6368,11 +6368,16 @@ table.insert(fingerprints, {
     return have_openssl
            and response.status == 200
            and response.body
-           and response.body:find("video_control_bar", 1, true)
-           and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*['\"]jscore/rpclogin%.js%?")
+           and (response.body:find("js/loginEx.js", 1, true)
+               and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*['\"]js/loginex%.js[?'\"]")
+               and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*['\"]jscore/rpccore%.js[?'\"]")
+             or response.body:find("/js/merge.js", 1, true)
+               and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*(['\"])[^'\"]-/js/merge%.js%1")
+               and response.body:lower():find("<div%f[%s][^>]-%sid%s*=%s*(['\"])download_plugins%1"))
   end,
   login_combos = {
-    {username = "admin", password = "admin"}
+    {username = "666666", password = "666666"},
+    {username = "admin",  password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
     local lurl = url.absolute(path, "RPC2_Login")
@@ -6388,15 +6393,43 @@ table.insert(fingerprints, {
     if not (resp1.status == 200 and resp1.body) then return false end
     local jstatus, jout = json.parse(resp1.body)
     local params = jstatus and jout.params
-    if not (params and params.encryption == "Default") then return false end
-    local hashfnc = function (...)
-                      local text = table.concat({...}, ":")
-                      return stdnse.tohex(openssl.md5(text)):upper()
-                    end
-    local hash = hashfnc(user, params.random, hashfnc(user, params.realm, pass))
+    if not params then return false end
+    local passtype
+    if not params.encryption then
+    elseif params.encryption == "Basic" then
+      pass = base64.enc(user .. ":" .. pass)
+    elseif params.encryption == "Default" then
+      local hashfnc = function (...)
+                        local text = table.concat({...}, ":")
+                        return stdnse.tohex(openssl.md5(text)):upper()
+                      end
+      if not (params.random and params.realm) then return false end
+      pass = hashfnc(user, params.random, hashfnc(user, params.realm, pass))
+      passtype = "Default"
+    elseif params.encryption == "OldDigest" then
+      local hash = openssl.md5(pass)
+      local ptbl = {}
+      for i = 1, #hash, 2 do
+        local a, b = hash:byte(i, i + 1)
+        a = (a + b) % 62
+        if a <= 9 then
+          b = 48
+        elseif a <= 35 then
+          b = 55
+        else
+          b = 61
+        end
+        table.insert(ptbl, string.char(a + b))
+      end
+      pass = table.concat(ptbl)
+    else
+      return false
+    end
     opts.cookies = opts.cookies .. ";  DhWebClientSessionID=" .. jout.session
     jin.session = jout.session
-    jin.params.password = hash
+    jin.params.password = pass
+    jin.params.passwordType = passtype
+    jin.params.authorityType = params.encryption
     local resp2 = http_post_simple(host, port, lurl, opts, json.generate(jin))
     if not (resp2.status == 200 and resp2.body) then return false end
     jstatus, jout = json.parse(resp2.body)
