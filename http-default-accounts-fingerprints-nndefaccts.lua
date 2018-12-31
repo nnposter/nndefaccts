@@ -885,6 +885,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "WebSphere Community Edition Console",
+  cpe = "cpe:/a:ibm:websphere_application_server",
   category = "web",
   paths = {
     {path = "/console/"}
@@ -916,6 +917,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "JBoss EAP Admin Console",
+  cpe = "cpe:/a:redhat:jboss_enterprise_application_platform",
   category = "web",
   paths = {
     {path = "/"}
@@ -1422,6 +1424,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Kanboard",
+  cpe = "cpe:/a:kanboard:kanboard",
   category = "web",
   paths = {
     {path = "/"},
@@ -1939,7 +1942,8 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Allied Telesis",
+  name = "Allied Telesis AR",
+  cpe = "cpe:/h:alliedtelesyn:cable_dsl_router_at-ar*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -2066,6 +2070,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Moxa EDR (var.1)",
+  cpe = "cpe:/o:moxa:edr_g903_firmware",
   category = "routers",
   paths = {
     {path = "/Login.asp"}
@@ -2102,6 +2107,7 @@ end
 
 table.insert(fingerprints, {
   name = "Moxa EDR (var.2)",
+  cpe = "cpe:/o:moxa:edr_g903_firmware",
   category = "routers",
   paths = {
     {path = "/Login.asp"}
@@ -2139,6 +2145,7 @@ end
 
 table.insert(fingerprints, {
   name = "Moxa EDR (var.3)",
+  cpe = "cpe:/o:moxa:edr_g903_firmware",
   category = "routers",
   paths = {
     {path = "/Login.asp"}
@@ -2219,6 +2226,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Moxa EDR (var.5)",
+  cpe = "cpe:/o:moxa:edr_g903_firmware",
   category = "routers",
   paths = {
     {path = "/Login.asp"}
@@ -2280,6 +2288,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Ovislink AirLive AP",
+  cpe = "cpe:/h:ovislink:airlive_*",
   category = "routers",
   paths = {
     {path = "/index.asp"}
@@ -2305,6 +2314,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Ovislink AirLive WIAS (var.1)",
+  cpe = "cpe:/h:ovislink:airlive_*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -2331,6 +2341,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Ovislink AirLive WIAS (var.2)",
+  cpe = "cpe:/h:ovislink:airlive_*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -2387,6 +2398,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Arris Touchstone",
+  cpe = "cpe:/a:arris:touchstone_*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -2890,6 +2902,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Planex Broad Lanner",
+  cpe = "cpe:/h:planex:brl-*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -3050,6 +3063,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "3Com OfficeConnect VPN Firewall",
+  cpe = "cpe:/h:3com:3cr870-95",
   category = "routers",
   paths = {
     {path = "/"}
@@ -5808,6 +5822,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Planex CS",
+  cpe = "cpe:/o:planex:cs-*",
   category = "security",
   paths = {
     {path = "/"}
@@ -5927,6 +5942,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Foscam Netwave (var.1)",
+  cpe = "cpe:/o:foscam:ip_camera_firmware",
   category = "security",
   paths = {
     {path = "/"}
@@ -6792,6 +6808,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Moxa MiiNePort",
+  cpe = "cpe:/o:moxa:miineport_*",
   category = "industrial",
   paths = {
     {path = "/"}
@@ -6895,6 +6912,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Wago I/O System 750",
+  cpe = "cpe:/h:wago:wago_i%2fo_system*",
   category = "industrial",
   paths = {
     {path = "/"}
@@ -7204,6 +7222,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "APC Management Card (basic auth)",
+  cpe = "cpe:/h:apc:ap*",
   category = "industrial",
   paths = {
     {path = "/"}
@@ -7223,6 +7242,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "APC Management Card",
+  cpe = "cpe:/h:apc:ap*",
   category = "industrial",
   paths = {
     {path = "/logon.htm"}
@@ -8268,6 +8288,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Asustor ADM",
+  cpe = "cpe:/o:asustor:data_master",
   category = "storage",
   paths = {
     {path = "/"}
@@ -9018,6 +9039,7 @@ table.insert(fingerprints, {
 
 table.insert(fingerprints, {
   name = "Dell iDRAC6/7 (Mbedthis)",
+  cpe = "cpe:/o:dell:idrac7_firmware",
   category = "console",
   paths = {
     {path = "/"}
