@@ -22,7 +22,7 @@ add `--script-args http-default-accounts.fingerprintfile=...` to the command lin
 ```
 nmap --script http-default-accounts --script-args http-default-accounts.fingerprintfile=~/http-default-accounts-fingerprints-nndefaccts.lua -p 80 192.168.1.1
 ```
-For more permanent use, you might consider replacing the default fingerprint dataset with this one. The default dataset is typically installed as `/usr/share/nmap/nselib/data/http-default-accounts-fingerprints.lua` (on Linux).
+For more permanent use, you might consider replacing the default fingerprint dataset with this one. The default dataset is typically installed as `/usr/share/nmap/nselib/data/http-default-accounts-fingerprints.lua` on Linux or `%ProgramFiles(x86)%\Nmap\nselib\data\http-default-accounts-fingerprints.lua` on Windows.
 
 ## Support
 For help with running script http-default-accounts or Nmap in general, see https://nmap.org/.
