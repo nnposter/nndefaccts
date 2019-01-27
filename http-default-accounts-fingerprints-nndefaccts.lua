@@ -5678,6 +5678,23 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "OEM Netcam",
+  category = "security",
+  paths = {
+    {path = "/"},
+  },
+  target_check = function (host, port, path, response)
+    return (http_auth_realm(response) or ""):find("^[Nn]etcam$")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "TP-Link IPC",
   category = "security",
   paths = {
