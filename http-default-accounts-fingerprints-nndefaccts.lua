@@ -44,6 +44,7 @@ local table = require "table"
 local url = require "url"
 local have_openssl, openssl = pcall(require, "openssl")
 local have_rand, rand = pcall(require, "rand")
+local have_tableaux, tableaux = pcall(require, "tableaux")
 
 ---
 -- http-default-accounts-fingerprints-nndefaccts.lua
@@ -63,16 +64,40 @@ local have_rand, rand = pcall(require, "rand")
 ---
 
 ---
--- Deeply clones a table.
--- @param tbl Table to clone
--- @return A clone of the original table with nested tables also cloned
+-- Backwards compatibility provisions for library rand
 ---
-local function table_clone (tbl)
-  local clone = {}
-  for k,v in pairs(tbl) do
-    clone[k] = type(v) == "table" and table_clone(v) or v
-  end
-  return clone
+if not have_rand then
+  rand = {}
+end
+if not rand.random_string then
+  rand.random_string = stdnse.generate_random_string
+end
+
+---
+-- Generates a random alphanumeric string.
+--
+-- @param len Length of the output string.
+-- @return A random string consisting of letters and digits
+---
+local function random_alnum (len)
+  return rand.random_string(len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+end
+
+---
+-- Backwards compatibility provisions for library tableaux
+---
+if not have_tableaux then
+  tableaux = {}
+end
+if not tableaux.tcopy then
+  tableaux.tcopy =
+    function (tbl)
+      local clone = {}
+      for k,v in pairs(tbl) do
+        clone[k] = type(v) == "table" and tableaux.tcopy(v) or v
+      end
+      return clone
+    end
 end
 
 ---
@@ -84,7 +109,7 @@ end
 -- @return A response table (see library http.lua for description)
 ---
 local function http_get_simple (host, port, path, options)
-  local opts = table_clone(options or {})
+  local opts = tableaux.tcopy(options or {})
   opts.bypass_cache = true
   opts.no_cache = true
   opts.redirect_ok = false
@@ -103,7 +128,7 @@ end
 -- @return A response table (see library http.lua for description)
 ---
 local function http_post_simple (host, port, path, options, postdata)
-  local opts = table_clone(options or {})
+  local opts = tableaux.tcopy(options or {})
   opts.no_cache = true
   opts.redirect_ok = false
   return http.post(host, port, path, opts, nil, postdata)
@@ -123,7 +148,7 @@ local function http_post_multipart (host, port, path, options, postdata)
   local boundary = ("-"):rep(20)
                    .. math.random(1000000, 9999999)
                    .. math.random(1000000, 9999999)
-  local opts = table_clone(options or {})
+  local opts = tableaux.tcopy(options or {})
   opts.header = opts.header or {}
   opts.header["Content-Type"] = "multipart/form-data; boundary=" .. boundary
   if type(postdata) ~= "table" then
@@ -218,7 +243,7 @@ end
 -- @see url.build
 ---
 local function url_build_defaults (host, port, parsed)
-  local parts = table_clone(parsed or {})
+  local parts = tableaux.tcopy(parsed or {})
   parts.host = parts.host or stdnse.get_hostname(host, port)
   parts.scheme = parts.scheme or shortport.ssl(host, port) and "https" or "http"
   if not parts.port and port.number ~= url.get_default_port(parts.scheme) then
@@ -263,26 +288,6 @@ end
 ---
 local function urlencode_all (s)
   return s:gsub(".", function (c) return ("%%%02x"):format(c:byte()) end)
-end
-
----
--- Abstracts out random string generation.
---
--- @param len Length of the output string.
--- @param charset Characters used to compose the output string.
--- @return A random string
----
-local random_string = have_rand and rand.random_string
-                      or stdnse.generate_random_string
-
----
--- Generates a random alphanumeric string.
---
--- @param len Length of the output string.
--- @return A random string consisting of letters and digits
----
-local function random_alnum (len)
-  return random_string(len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 end
 
 
