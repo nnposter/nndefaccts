@@ -99,6 +99,9 @@ if not tableaux.tcopy then
       return clone
     end
 end
+if not tableaux.contains then
+  tableaux.contains = stdnse.contains
+end
 
 ---
 -- Requests given path using http.get() but disabling cache and redirects.
@@ -1506,7 +1509,8 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return have_openssl
-           and stdnse.contains(openssl.supported_ciphers(), "aes-256-ctr")
+           and tableaux.contains(openssl.supported_ciphers(), "aes-256-ecb")
+           and tableaux.contains(openssl.supported_ciphers(), "aes-256-ctr")
            and response.status == 200
            and response.body
            and response.body:find("TeamPass", 1, true)
