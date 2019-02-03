@@ -5263,22 +5263,119 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "IQeye Camera",
+  name = "IQinVision Camera (var.1)",
   category = "security",
   paths = {
-    {path = "/"},
-    {path = "/basicset.html"},
-    {path = "/imageset.html"}
+    {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return (http_auth_realm(response) or ""):find("^IQEYE%x+$")
+    local server = response.header["server"] or ""
+    return response.status == 401
+           and response.body
+           and (server:find("^IQinVision Embedded ")
+                and response.body:find("<xmp>%s*Please Authenticate%s*</xmp>")
+             or server:find("^IQhttpD/%d+%.")
+                and response.body:find("Authorization required for the URL", 1, true))
   end,
   login_combos = {
     {username = "login", password = "access"},
-    {username = "root", password = "system"}
+    {username = "root",  password = "system"}
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "IQinVision Camera (var.2)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 403
+           and (response.header["server"] or ""):find("^IQinVision Embedded ")
+           and sets_cookie(response, "SrvrNonce", "^%x+")
+  end,
+  login_combos = {
+    {username = "login", password = "access"},
+    {username = "root",  password = "system"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    local nonce = sets_cookie(resp1, "SrvrNonce")
+    if not nonce then return false end
+    local creds = stdnse.tohex(openssl.md5(table.concat({nonce, user,
+                                                         pass:upper()}, ":")))
+    local cookies = ("SrvrNonce=%s; SrvrCreds=%s"):format(nonce, creds)
+    local resp2 = http_get_simple(host, port, path, {cookies=cookies})
+    return resp2.status == 200
+  end
+})
+
+table.insert(fingerprints, {
+  name = "IQinVision Camera (var.3)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local server = response.header["server"] or ""
+    if not (have_openssl
+           and response.status == 200
+           and response.body
+           and (server:find("^IQinVision Embedded ")
+                and response.body:find(">IQ", 1, true)
+                and response.body:lower():find("<title>iq", 1, true)
+             or server:find("^IQhttpD/%d+%.")
+                and response.body:find("%Wself%.location%s*=%s*(['\"])dptzvid%.html%1"))) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "accessset.html"))
+    return resp.status == 401
+  end,
+  login_combos = {
+    {username = "root", password = "system"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "accessset.html"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "IQinVision Camera (var.4)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (have_openssl
+           and response.status == 200
+           and (response.header["server"] or ""):find("^IQinVision Embedded ")
+           and response.body
+           and response.body:find(">IQ", 1, true)
+           and response.body:lower():find("<title>iq", 1, true)) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "accessset.html"))
+    return resp.status == 403
+           and sets_cookie(resp, "SrvrNonce", "^%x+")
+  end,
+  login_combos = {
+    {username = "root", password = "system"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "accessset.html")
+    local resp1 = http_get_simple(host, port, lurl)
+    local nonce = sets_cookie(resp1, "SrvrNonce")
+    if not nonce then return false end
+    local creds = stdnse.tohex(openssl.md5(table.concat({nonce, user,
+                                                         pass:upper()}, ":")))
+    local cookies = ("SrvrNonce=%s; SrvrCreds=%s"):format(nonce, creds)
+    local resp2 = http_get_simple(host, port, lurl, {cookies=cookies})
+    return resp2.status == 200
   end
 })
 
