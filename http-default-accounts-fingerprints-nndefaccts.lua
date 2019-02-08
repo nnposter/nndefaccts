@@ -455,7 +455,7 @@ table.insert(fingerprints, {
            and resp.body
            and resp.body:find("ManageEngine", 1, true)
            and resp.body:lower():find("<title>%s*manageengine opmanager%s*</title>")
-           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/jsp/login%.do%1")
+           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/jsp/login%.do%1[%s>]")
   end,
   login_combos = {
     {username = "IntegrationUser", password = "plugin"},
@@ -540,7 +540,7 @@ table.insert(fingerprints, {
            and resp.body
            and resp.body:find("ntopng", 1, true)
            and resp.body:lower():find("<title>welcome to ntopng</title>", 1, true)
-           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/authorize%.html%1")
+           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/authorize%.html%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -571,7 +571,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("OpenNMS", 1, true)
            and response.body:lower():find("<title>%s*opennms web console%s*</title>")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)j_username%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)j_username%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"},
@@ -813,7 +813,7 @@ table.insert(fingerprints, {
            and resp.body
            and resp.body:find("RockMongo", 1, true)
            and resp.body:lower():find("<title>rockmongo</title>")
-           and resp.body:lower():find("<select%f[%s][^>]-%sname%s*=%s*(['\"]?)host%1")
+           and resp.body:lower():find("<select%f[%s][^>]-%sname%s*=%s*(['\"]?)host%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -1175,7 +1175,7 @@ table.insert(fingerprints, {
            and resp.body
            and resp.body:find("Matterhorn", 1, true)
            and resp.body:lower():find("<title>opencast matterhorn ", 1, true)
-           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/j_spring_security_check%1")
+           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/j_spring_security_check%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "opencast"}
@@ -1259,7 +1259,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("GLPI", 1, true)
            and response.body:lower():find("<title>glpi ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)login_name%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)login_name%1[%s>]")
   end,
   login_combos = {
     {username = "glpi",      password = "glpi"},
@@ -1342,7 +1342,7 @@ table.insert(fingerprints, {
     if not (resp1.status == 200 and resp1.body) then return false end
     local lurl
     for html in resp1.body:gmatch("<form%f[%s][^>]-%sname%s*=%s*['\"]formlogin['\"][^>]*") do
-      lurl = html:match("%saction%s*=%s*['\"]([^'\"]*[?&;]client_id=[^'\"]*)")
+      lurl = html:match("%saction%s*=%s*['\"]([^'\"]-[?&;]client_id=[^'\"]*)")
       if lurl then break end
     end
     if not lurl then return false end
@@ -1384,7 +1384,7 @@ table.insert(fingerprints, {
     if not (resp1.status == 200 and resp1.body) then return false end
     local lurl
     for html in resp1.body:gmatch("<form%f[%s][^>]-%sname%s*=%s*['\"]formlogin['\"][^>]*") do
-      lurl = html:match("%saction%s*=%s*['\"]([^'\"]*[?&;]client_id=[^'\"]*)")
+      lurl = html:match("%saction%s*=%s*['\"]([^'\"]-[?&;]client_id=[^'\"]*)")
       if lurl then break end
     end
     if not lurl then return false end
@@ -1558,7 +1558,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("TimeClock", 1, true)
            and response.body:lower():find("<title>capesoft time clock web ", 1, true)
-           and response.body:lower():find("%Whref%s*=%s*(['\"]?)employees%.php%1")
+           and response.body:lower():find("%Whref%s*=%s*(['\"])employees%.php%1")
   end,
   login_combos = {
     {username = "9970", password = "password"}
@@ -1568,7 +1568,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "employees.php"), nil,
                                  {login=user,password=pass,action="Login"})
     return resp.status == 200
-           and (resp.body or ""):find("%sclass%s*=%s*(['\"]?)logout%1")
+           and (resp.body or ""):find("%sclass%s*=%s*(['\"]?)logout%1[%s>]")
   end
 })
 
@@ -1613,7 +1613,7 @@ table.insert(fingerprints, {
            and resp.body
            and resp.body:find("Greenbone", 1, true)
            and resp.body:lower():find("<title>greenbone security assistant</title>", 1, true)
-           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]*/omp%1")
+           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/omp%1[%s>]")
   end,
   login_combos = {
     {username = "admin",  password = "admin"},
@@ -1647,7 +1647,7 @@ table.insert(fingerprints, {
            and resp.body
            and resp.body:find("hashstack", 1, true)
            and resp.body:lower():find("<title>hashstack - login</title>", 1, true)
-           and resp.body:lower():find("<form%f[%s][^>]-%sclass%s*=%s*(['\"]?)form%-signin%1")
+           and resp.body:lower():find("<form%f[%s][^>]-%sclass%s*=%s*(['\"]?)form%-signin%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -2049,7 +2049,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Moxa AWK", 1, true)
            and response.body:find("/webNonce%W")
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/home%.asp%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/home%.asp%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "root"}
@@ -2073,7 +2073,7 @@ table.insert(fingerprints, {
                                   {cookies={{name=pcookie, value=cpass}}},
                                   form3)
     return resp3.status == 200
-           and (resp3.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)main%.asp%1")
+           and (resp3.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)main%.asp%1[%s>]")
   end
 })
 
@@ -2110,7 +2110,7 @@ table.insert(fingerprints, {
     local resp2 = http_get_simple(host, port, url.absolute(path, "index.asp"),
                                  {cookies=cookies})
     return resp2.status == 200
-           and (resp2.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1")
+           and (resp2.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1[%s>]")
 end
 })
 
@@ -2148,7 +2148,7 @@ table.insert(fingerprints, {
     local resp2 = http_get_simple(host, port, url.absolute(path, "home.asp"),
                                  {cookies=cookies})
     return resp2.status == 200
-           and (resp2.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1")
+           and (resp2.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1[%s>]")
 end
 })
 
@@ -2191,7 +2191,7 @@ table.insert(fingerprints, {
     local resp3 = http_get_simple(host, port, url.absolute(path, "home.asp"),
                                  {cookies=cookies})
     return resp3.status == 200
-           and (resp3.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1")
+           and (resp3.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1[%s>]")
   end
 })
 
@@ -2229,7 +2229,7 @@ table.insert(fingerprints, {
     local resp2 = http_get_simple(host, port, url.absolute(path, "home.asp"),
                                  {cookies=cookies})
     return resp2.status == 200
-           and (resp2.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1")
+           and (resp2.body or ""):lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)name%.asp%1[%s>]")
   end
 })
 
@@ -2307,7 +2307,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("AirLive", 1, true)
            and response.body:lower():find("<title>airlive [%w-]+</title>")
-           and response.body:lower():find("%shref%s*=%s*(['\"]?)sts_%w+%.asp%1")
+           and response.body:lower():find("%shref%s*=%s*(['\"]?)sts_%w+%.asp%1[%s>]")
   end,
   login_combos = {
     {username = "", password = "airlive"}
@@ -2333,8 +2333,8 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("WIAS", 1, true)
            and response.body:lower():find("<title>wias%-%d+%a</title>")
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)check%.shtml%1")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)password%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)check%.shtml%1[%s>]")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)password%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "airlive"}
@@ -2360,8 +2360,8 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("AirLive", 1, true)
            and response.body:lower():find("<title>airlive wias%-%d+%a</title>")
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)check%.shtml%1")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)adm_pwd%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)check%.shtml%1[%s>]")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)adm_pwd%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "airlive"}
@@ -2416,7 +2416,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("sta_wifi", 1, true)
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)check%.php%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)check%.php%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "password"}
@@ -2660,7 +2660,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("DIR-620", 1, true)
            and response.body:lower():find("<title>dir-620</title>", 1, true)
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)index%.cgi%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)index%.cgi%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "anonymous"}
@@ -3023,7 +3023,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("ZTE", 1, true)
-           and response.body:lower():find("<form%f[%s][^>]-%sname%s*=%s*(['\"]?)flogin%1%f[%s][^>]-%saction%s*=%s*(['\"]?)getpage%.gch%?pid=1001%2")
+           and response.body:lower():find("<form%f[%s][^>]-%sname%s*=%s*(['\"]?)flogin%1%f[%s][^>]-%saction%s*=%s*(['\"]?)getpage%.gch%?pid=1001%2[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -3343,7 +3343,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("ZyWALL", 1, true)
            and response.body:lower():find("<title>zywall [%u%d]")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)pwd_r%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)pwd_r%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "1234"}
@@ -3426,7 +3426,7 @@ table.insert(fingerprints, {
            and sets_cookie(response, "siemens_ad_session", "^%x+")
            and response.body
            and response.body:find(" SCALANCE X ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)noncea%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)noncea%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"},
@@ -3471,7 +3471,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("login.cgi", 1, true)
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)cgi%-bin/login%.cgi%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)cgi%-bin/login%.cgi%1[%s>]")
            and response.body:lower():find("<title>femtocell management system</title>", 1, true)
   end,
   login_combos = {
@@ -3682,7 +3682,7 @@ table.insert(fingerprints, {
            and sets_cookie(response, "tt_adm", "^%l+$")
            and response.body
            and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"])[^'\"]-%?pageid=%w+%1")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)pass_login%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)pass_login%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "1234"}
@@ -3956,7 +3956,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.header["server"] == "Z-World Rabbit"
            and response.body
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)objsum00%.html%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)objsum00%.html%1[%s>]")
   end,
   login_combos = {
     {username = "", password = "0000"},
@@ -3974,7 +3974,7 @@ table.insert(fingerprints, {
     local resp2 = http_get_simple(host, port,
                                  url.absolute(path, "password.html"))
     return resp2.status == 200
-           and (resp2.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)infield5%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)2%2")
+           and (resp2.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)infield5%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)2%2[%s>]")
   end
 })
 
@@ -4361,7 +4361,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("OpenCom", 1, true)
            and response.body:lower():find("<title>opencom 1000</title>", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"])[^'\"]*/login%.html%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"])[^'\"]-/login%.html%1")
   end,
   login_combos = {
     {username = "Admin", password = "Admin"}
@@ -4737,7 +4737,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.header["server"] == "TELES AG"
            and response.body
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]*/common/navibar_[%w_]+_login%.html%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/common/navibar_[%w_]+_login%.html%1[%s>]")
   end,
   login_combos = {
     {username = "teles-admin",   password = "tcs-admin"},
@@ -4747,7 +4747,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local resp1 = http_get_simple(host, port, path)
     if not (resp1.status == 200 and resp1.body) then return false end
-    local nurl = resp1.body:lower():match("<frame%f[%s][^>]-%ssrc%s*=%s*['\"]?([^'\"]*/common/navibar_[%w_]+_login%.html)")
+    local nurl = resp1.body:lower():match("<frame%f[%s][^>]-%ssrc%s*=%s*['\"]?([^'\"]-/common/navibar_[%w_]+_login%.html)")
     if not nurl then return false end
     nurl = url.absolute(path, nurl)
     local resp2 = http_get_simple(host, port, nurl)
@@ -5079,7 +5079,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("SANYO", 1, true)
            and response.body:lower():find("<title>sanyo +network camera</title>")
-           and response.body:lower():find("<form%f[%s][^>]-%sname%s*=%s*(['\"]?)lang_set%1")) then
+           and response.body:lower():find("<form%f[%s][^>]-%sname%s*=%s*(['\"]?)lang_set%1[%s>]")) then
       return false
     end
     local resp = http_get_simple(host, port,
@@ -5105,7 +5105,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("SANYO", 1, true)
            and response.body:lower():find("<title>sanyo +network camera</title>")
-           and response.body:lower():find("<form%f[%s][^>]-%sname%s*=%s*(['\"]?)lang_set%1")) then
+           and response.body:lower():find("<form%f[%s][^>]-%sname%s*=%s*(['\"]?)lang_set%1[%s>]")) then
       return false
     end
     local resp = http_get_simple(host, port,
@@ -5416,7 +5416,7 @@ table.insert(fingerprints, {
            and (response.header["server"] or ""):find("^2%.2%.")
            and response.body
            and response.body:find("TO_LOAD", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)user_username%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)user_username%1[%s>]")
   end,
   login_combos = {
     {username = "svuser", password = "servconf"},
@@ -5512,7 +5512,7 @@ table.insert(fingerprints, {
            and (response.header["server"] or ""):find("^Boa/%d+%.")
            and response.body
            and response.body:find("controlmenu.htm", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)controlmenu%.htm%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)controlmenu%.htm%1[%s>]")
            and response.body:lower():find("<title>airlive</title>", 1, true)
   end,
   login_combos = {
@@ -6795,7 +6795,7 @@ table.insert(fingerprints, {
            and response.status == 200
            and response.body
            and response.body:find("Xflow", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)rsakey1%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)rsakey1%1[%s>]")
   end,
   login_combos = {
     {username = "TEST", password = "TEST"}
@@ -6861,7 +6861,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Adcon", 1, true)
            and response.body:lower():find("<title>%s*adcon telemetry gateway%s*</title>")
-           and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)[^'\"]*%f[%w]configurator%.jnlp%1")
+           and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)[^'\"]-%f[%w]configurator%.jnlp%1[%s>]")
   end,
   login_combos = {
     {username = "root", password = "840sw"},
@@ -7085,7 +7085,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.header["server"] == "Z-World Rabbit"
            and response.body
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)right%.shtml%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)right%.shtml%1[%s>]")
   end,
   login_combos = {
     {username = "Operator1",  password = "1"},
@@ -7124,7 +7124,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("EC2", 1, true)
            and response.body:lower():find("<title>ec2 %d+ ")
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)bckgnd%.html%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)bckgnd%.html%1[%s>]")
   end,
   login_combos = {
     {username = "EmersonID", password = "12"}
@@ -7177,7 +7177,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("NetMonitor", 1, true)
            and response.body:lower():find("<title>netmonitor ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginname%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginname%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -7187,7 +7187,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "view_stats.htm"), nil,
                                  {loginname=user, loginpassword=pass})
     return resp.status == 200
-           and (resp.body or ""):lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)setup_stats%.htm%1")
+           and (resp.body or ""):lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)setup_stats%.htm%1[%s>]")
   end
 })
 
@@ -7203,7 +7203,7 @@ table.insert(fingerprints, {
            and response.body:find("Netmonitor", 1, true)
            and response.body:find("loginState", 1, true)
            and response.body:lower():find("<title>netmonitor ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginun%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginun%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -7216,7 +7216,7 @@ table.insert(fingerprints, {
     end
     local resp2 = http_get_simple(host, port, url.absolute(path, "left.htm"))
     return resp2.status == 200
-           and (resp2.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginstate%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)1%2")
+           and (resp2.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginstate%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)1%2[%s>]")
   end
 })
 
@@ -7232,7 +7232,7 @@ table.insert(fingerprints, {
            and response.body:find("Netmonitor", 1, true)
            and response.body:find("hmcookies", 1, true)
            and response.body:lower():find("<title>netmonitor ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginun%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)loginun%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -7244,7 +7244,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "main.htm"),
                                  nil, form)
     return resp.status == 200
-           and (resp.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)hmcookies%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)1%d+%2")
+           and (resp.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)hmcookies%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)1%d+%2[%s>]")
   end
 })
 
@@ -7259,7 +7259,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find(">Jacarta ", 1, true)
            and response.body:lower():find("<title>jacarta interseptor", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/pagecompre.html%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/pagecompre.html%1[%s>]")
   end,
   login_combos = {
     {username = "interSeptor", password = "admin"}
@@ -7281,7 +7281,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Phasefale Joule", 1, true)
            and response.body:lower():find("<title>phasefale joule", 1, true)
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/set/set%.html%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/set/set%.html%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "pass"}
@@ -7376,7 +7376,7 @@ table.insert(fingerprints, {
            and (response.body:find("apclogo", 1, true)
              or response.body:find("www.apc.com", 1, true))
            and response.body:lower():find("<title>[^<]*log on</title>")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)login_username%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)login_username%1[%s>]")
   end,
   login_combos = {
     {username = "apc",      password = "apc"},
@@ -7514,7 +7514,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find(">iBoot", 1, true)
            and response.body:lower():find("<title>iboot bar ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)password%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)password%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -7540,7 +7540,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("HP", 1, true)
            and response.body:lower():find("<title>hp power manager</title>", 1, true)
-           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/goform/formlogin%1")
+           and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/goform/formlogin%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -7628,7 +7628,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Sunny ", 1, true)
            and response.body:lower():find("<title>sunny %a+</title>")
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)home_frameset%.htm%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)home_frameset%.htm%1[%s>]")
   end,
   login_combos = {
     {username = "", password = "sma"}
@@ -7659,8 +7659,8 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Sunny ", 1, true)
            and response.body:lower():find("<title>sunny central ")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)action%1")
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)command%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)action%1[%s>]")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)command%1[%s>]")
   end,
   login_combos = {
     {username = "user",      password = "sma"},
@@ -7675,7 +7675,7 @@ table.insert(fingerprints, {
                   _ie_dummy=""}
     local resp = http_post_simple(host, port, path, nil, form)
     return resp.status == 200
-           and (resp.body or ""):find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)action%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)solar%2")
+           and (resp.body or ""):find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)action%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)solar%2[%s>]")
   end
 })
 
@@ -7689,8 +7689,8 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("devabroadcast.com", 1, true)
-           and (response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)login%.shtml%1")
-             or response.body:lower():find("<li%f[%s][^>]-%sdata%-c%s*=%s*(['\"]?)lgn%1"))
+           and (response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)login%.shtml%1[%s>]")
+             or response.body:lower():find("<li%f[%s][^>]-%sdata%-c%s*=%s*(['\"]?)lgn%1[%s>]"))
   end,
   login_combos = {
     {username = "user",  password = "pass"},
@@ -7717,7 +7717,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("devabroadcast.com", 1, true)
-           and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)[^'\"]-/secure/net%.htm%1")
+           and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)[^'\"]-/secure/net%.htm%1[%s>]")
   end,
   login_combos = {
     {username = "user",  password = "pass"}
@@ -7767,7 +7767,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("CANON", 1, true)
            and response.body:lower():find("<title>default authentication", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)deptid%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)deptid%1[%s>]")
   end,
   login_combos = {
     {username = "7654321", password = "7654321"}
@@ -7794,7 +7794,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("start.htm", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]*/start/start%.htm%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/start/start%.htm%1[%s>]")
            and response.body:lower():find("<title>kyocera command center</title>", 1, true)
   end,
   login_combos = {
@@ -7828,7 +7828,7 @@ table.insert(fingerprints, {
            and (response.header["server"] or ""):find("^KM%-httpd/%d+%.")
            and response.body
            and response.body:find("start.htm", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]*/start/start%.htm%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/start/start%.htm%1[%s>]")
   end,
   login_combos = {
     {username = "", password = ""},
@@ -7852,7 +7852,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("Start_Wlm.htm", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]*/startwlm/start_wlm%.htm%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/startwlm/start_wlm%.htm%1[%s>]")
   end,
   login_combos = {
     {username = "Admin", password = "Admin"}
@@ -8082,7 +8082,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("XEROX WORKCENTRE", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/header%.php%?tab=status%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/header%.php%?tab=status%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "1111"}
@@ -8162,7 +8162,7 @@ table.insert(fingerprints, {
       return false
     end
     local lcbody = response.body:lower()
-    return lcbody:find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)hdstat%.htm%1")
+    return lcbody:find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)hdstat%.htm%1[%s>]")
            and (lcbody:find("<title>[%w%s]*workcentre%s")
              or lcbody:find("<title>%s*internet services%W")
              or lcbody:find("<title>%s*docucolor%W"))
@@ -8239,7 +8239,7 @@ table.insert(fingerprints, {
            and response.body:find("Xerox", 1, true)
            and response.body:find("/status/statusAlerts.dhtml", 1, true)
            and response.body:find("/tabsFrame.dhtml", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/tabsframe%.dhtml%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/tabsframe%.dhtml%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "1111"}
@@ -8264,7 +8264,7 @@ table.insert(fingerprints, {
            and response.body:find("Xerox", 1, true)
            and response.body:find("/js/deviceStatus.dhtml", 1, true)
            and response.body:find("/tabsFrame.dhtml", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/tabsframe%.dhtml%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/tabsframe%.dhtml%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "1111"}
@@ -8289,7 +8289,7 @@ table.insert(fingerprints, {
            and response.body:find("Xerox", 1, true)
            and response.body:find("/js/deviceStatus.dhtml", 1, true)
            and response.body:find("/tabsFrame.dhtml", 1, true)
-           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/tabsframe%.dhtml%1")
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/tabsframe%.dhtml%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "1111"}
@@ -8586,7 +8586,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("openmediavault", 1, true)
-           and response.body:lower():find("%ssrc%s*=%s*(['\"])[^'\"]*js/omv/rpc%.js%1")
+           and response.body:lower():find("%ssrc%s*=%s*(['\"])[^'\"]-js/omv/rpc%.js%1")
   end,
   login_combos = {
     {username = "admin", password = "openmediavault"}
@@ -8686,7 +8686,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Seagate", 1, true)
            and response.body:lower():find("<title>seagate nas - ", 1, true)
-           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)p_user%1")
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)p_user%1[%s>]")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -9053,7 +9053,7 @@ table.insert(fingerprints, {
     local resp2 = http_post_simple(host, port, lurl,
                                   {cookies=resp1.cookies, header=header}, form2)
     return resp2.status == 200
-           and (resp2.body or ""):lower():find("<input%f[%s][^>]-%sid%s*=%s*(['\"]?)new_password2%1")
+           and (resp2.body or ""):lower():find("<input%f[%s][^>]-%sid%s*=%s*(['\"]?)new_password2%1[%s>]")
   end
 })
 
