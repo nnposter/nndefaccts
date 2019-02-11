@@ -5900,6 +5900,97 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Milesight Camera (var.1)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and (response.body:find(">Milesight Network Camera", 1, true)
+             or response.body:find(">IPCAM Network Camera", 1, true))
+           and response.body:lower():find("<input%f[%s][^>]-%sid%s*=%s*(['\"]?)secret%1[%s>]")
+           and not response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*['\"]?[^'\"]-/javascript/md5%.js%?")
+  end,
+  login_combos = {
+    {username = "admin",    password = "ms1234"},
+    {username = "operator", password = "ms1234"},
+    {username = "viewer",   password = "ms1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local userno = {admin=0, operator=1, viewer=2}
+    local creds = {tostring(userno[user]),
+                   url.escape(user),
+                   url.escape(pass)
+                   }
+    local lurl = "vb.htm?language=ie&checkpassword=" .. table.concat(creds, ":")
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and resp.body:find("OK checkpassword", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Milesight Camera (var.2)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and (response.body:find(">Milesight Network Camera", 1, true)
+             or response.body:find(">IPCAM Network Camera", 1, true))
+           and response.body:lower():find("<input%f[%s][^>]-%sid%s*=%s*(['\"]?)secret%1[%s>]")
+           and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*['\"]?[^'\"]-/javascript/md5%.js%?")
+end,
+  login_combos = {
+    {username = "admin",    password = "ms1234"},
+    {username = "operator", password = "ms1234"},
+    {username = "viewer",   password = "ms1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local userno = {admin=0, operator=1, viewer=2}
+    local creds = {tostring(userno[user]),
+                   url.escape(user),
+                   stdnse.tohex(openssl.md5(pass))}
+    local lurl = "vb.htm?language=ie&checkpassword=" .. table.concat(creds, ":")
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and resp.body:find("OK checkpassword", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Alphafinity Camera",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">Alphafinity Network Camera", 1, true)
+           and response.body:lower():find("<input%f[%s][^>]-%sid%s*=%s*(['\"]?)secret%1[%s>]")
+           and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*['\"]?[^'\"]-/javascript/md5%.js%?")
+end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local userno = {admin=0, operator=1, viewer=2}
+    local creds = {tostring(userno[user]),
+                   url.escape(user),
+                   stdnse.tohex(openssl.md5(pass))}
+    local lurl = "vb.htm?language=ie&checkpassword=" .. table.concat(creds, ":")
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and resp.body:find("OK checkpassword", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "OEM MegapixelIPCamera",
   category = "security",
   paths = {
