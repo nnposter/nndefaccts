@@ -52,7 +52,7 @@ Please send a Fiddler, Burp, or ZAP session file to nndefaccts /at/ shared-files
 1. Send it to the above-mentioned e-mail.
 
 ## Author, License
-NNdefaccts is Copyright (c) 2012-2018 by nnposter (nnposter /at/ users.sourceforge.net, https://github.com/nnposter), a party separate from Fyodor, Nmap Project, and Insecure.Com, LLC.
+NNdefaccts is Copyright (c) 2012-2019 by nnposter (nnposter /at/ users.sourceforge.net, https://github.com/nnposter), a party separate from Fyodor, Nmap Project, and Insecure.Com, LLC.
 
 NNdefaccts is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

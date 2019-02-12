@@ -2,7 +2,7 @@
 This file is part of NNdefaccts, an alternate fingerprint dataset for
 Nmap script http-default-accounts.
 
-NNdefaccts is Copyright (c) 2012-2018 by nnposter
+NNdefaccts is Copyright (c) 2012-2019 by nnposter
 (nnposter /at/ users.sourceforge.net, <https://github.com/nnposter>)
 
 NNdefaccts is free software: you can redistribute it and/or modify it
