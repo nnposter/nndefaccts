@@ -1030,7 +1030,13 @@ table.insert(fingerprints, {
     {username = "cxsdk", password = "kdsxc"},
     {username = "xampp", password = "xampp"},
     {username = "QCC", password = "QLogic66"},
-    {username = "fhir", password = "FHIRDefaultPassword"}
+    {username = "fhir", password = "FHIRDefaultPassword"},
+    {username = "pippo", password = "paperino"},
+    {username = "topolino", password = "minnie"},
+    {username = "root", password = "vagrant"},
+    {username = "tomcat", password = "s3cret"},
+    {username = "root", password = "owaspbwa"},
+    {username = "admin", password = "owaspbwa"}
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
