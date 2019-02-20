@@ -180,10 +180,16 @@ end
 -- @param path Path to request
 -- @param user HTTP authentication username
 -- @param pass HTTP authentication password
--- @param digest true: digest auth, false: basic auth
+-- @param digest true: digest auth, false: basic auth, "any": try to detect
 -- @return True if login in was successful
 ---
 local function try_http_auth (host, port, path, user, pass, digest)
+  if digest == "any" then
+    local resp = http_get_simple(host, port, path)
+    local auth = (resp.header["www-authenticate"] or ""):lower():match("^%w+")
+    if not auth then return nil end
+    digest = auth == "digest"
+  end
   local creds = {username = user, password = pass, digest = digest}
   local resp = http_get_simple(host, port, path, {auth=creds})
   return resp.status and not (resp.status >= 400 and resp.status <= 405)
@@ -5679,11 +5685,9 @@ table.insert(fingerprints, {
     {username = "root", password = "camera"}
   },
   login_check = function (host, port, path, user, pass)
-    local lurl = url.absolute(path, "admin/index.html?lang=en")
-    local resp = http_get_simple(host, port, lurl)
-    local auth = (resp.header["www-authenticate"] or ""):lower():match("^%w+")
-    if not auth then return nil end
-    return try_http_auth(host, port, lurl, user, pass, auth == "digest")
+    return try_http_auth(host, port,
+                        url.absolute(path, "admin/index.html?lang=en"),
+                        user, pass, "any")
   end
 })
 
