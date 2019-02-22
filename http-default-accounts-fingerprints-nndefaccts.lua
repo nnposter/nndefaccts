@@ -698,7 +698,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find(">Ambari<", 1, true)
            and response.body:lower():find("<title>ambari</title>", 1, true)
-           and response.body.lower():find("<script%f[%s][^>]-%ssrc%s*=%s*(['\"])javascripts/app%.js%1")
+           and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*(['\"])javascripts/app%.js%1")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
