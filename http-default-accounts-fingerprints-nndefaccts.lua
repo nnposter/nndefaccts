@@ -8869,6 +8869,37 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Western Digital My Cloud",
+  category = "storage",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and sets_cookie(response, "PHPSESSID", "^%x+$")
+           and response.body
+           and response.body:find("/cgi-bin/login_mgr.cgi", 1, true)
+           and response.body:find("%Wcmd:%s*(['\"])wd_login%1")
+  end,
+  login_combos = {
+    {username = "admin", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local form = {cmd="wd_login",
+                  username=user,
+                  pwd=base64.enc(pass),
+                  port=""}
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "cgi-bin/login_mgr.cgi"),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 200
+           and (resp2.body or ""):find("<config>.*<res>[1-9]</res>.*</config>")
+  end
+})
+
+table.insert(fingerprints, {
   name = "WiseGiga",
   category = "storage",
   paths = {
