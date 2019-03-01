@@ -4060,11 +4060,14 @@ table.insert(fingerprints, {
     {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
+    local form = {opcode="login",
+                  url="/",
+                  needxml=0,
+                  uid=user,
+                  passwd=pass}
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "screens/wms/wms.login"),
-                                 nil,
-                                 {opcode="login", url="/", needxml="0",
-                                 uid=user, passwd=pass})
+                                 nil, form)
     return resp.status == 200
            and (resp.body or ""):find("/screens/wmsi/monitor.summary.html", 1, true)
   end
