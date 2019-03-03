@@ -5736,7 +5736,31 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "OEM DNVRS-Webs Camera",
+  name = "Hikvision (var.1)",
+  category = "security",
+  paths = {
+    {path = "/index.asp"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("%Wwindow%.location%.href%s*=%s*['\"]doc/page/login%.asp['\"?]")
+           and response.body:lower():find("<title>index</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "12345"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, "PSIA/Custom/SelfExt/userCheck"),
+                                {auth={username=user, password=pass}})
+    return resp.status == 200
+           and (resp.body or ""):lower():find("<statusvalue>200</statusvalue>", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Hikvision (var.2)",
   category = "security",
   paths = {
     {path = "/"}
