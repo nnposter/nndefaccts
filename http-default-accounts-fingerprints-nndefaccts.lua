@@ -299,6 +299,16 @@ local function urlencode_all (s)
   return s:gsub(".", function (c) return ("%%%02x"):format(c:byte()) end)
 end
 
+---
+-- Decodes a base64-encoded string safely, catching any decoding errors.
+--
+-- @param s The string to be decoded.
+-- @return A decoded string or nil if the input is invalid
+---
+local function b64decode (s)
+  local status, out = pcall(base64.dec, s)
+  return status and out or nil
+end
 
 
 fingerprints = {}
@@ -4737,7 +4747,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "edge/security/check"),
                                  nil, form)
     if not (resp.status == 200 and resp.body) then return false end
-    local jstatus, jout = json.parse(base64.dec(resp.body:gsub("%s+","")))
+    local jstatus, jout = json.parse(b64decode(resp.body:gsub("%s+","")) or "")
     return jstatus and jout.success
   end
 })
