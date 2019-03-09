@@ -4543,7 +4543,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Polycom SoundPoint",
+  name = "Polycom SoundPoint (var.1)",
   category = "voip",
   paths = {
     {path = "/"}
@@ -4554,6 +4554,7 @@ table.insert(fingerprints, {
            and response.body:find("Polycom", 1, true)
            and response.body:find("submitLoginInfo", 1, true)
            and response.body:lower():find("<title>polycom - configuration utility</title>", 1, true)
+           and response.body:lower():find("<body%f[%s][^>]-%sonload%s*=%s*(['\"]?)document%.login%.password%.focus%(%)%1[%s>]")
   end,
   login_combos = {
     {username = "Polycom", password = "456"},
@@ -4563,6 +4564,34 @@ table.insert(fingerprints, {
     local qstr = url.build_query({t=os.date("!%a, %d %b %Y %H:%M:%S GMT")})
     return try_http_auth(host, port, url.absolute(path, "auth.htm?" .. qstr),
                         user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Polycom SoundPoint (var.2)",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Polycom", 1, true)
+           and response.body:find("submitLoginInfo", 1, true)
+           and response.body:lower():find("<title>polycom - configuration utility</title>", 1, true)
+           and response.body:lower():find("<input%f[%s][^>]-%sautocomplete%s*=%s*(['\"]?)off%1[%s/>]")
+  end,
+  login_combos = {
+    {username = "Polycom", password = "456"},
+    {username = "User",    password = "123"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local creds = {username = user, password = pass, digest = false}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "form-submit/auth.htm"),
+                                 {auth=creds}, "")
+    return resp.status == 200
+           and (resp.body or ""):find("|SUCCESS|", 1, true)
   end
 })
 
