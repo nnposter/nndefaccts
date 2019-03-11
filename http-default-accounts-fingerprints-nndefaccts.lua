@@ -2549,8 +2549,7 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return have_openssl
-           and response.status == 200
+    return response.status == 200
            and response.body
            and response.body:find("isAPmode", 1, true)
            and response.body:lower():find("<meta%f[%s][^>]-%sname%s*=%s*(['\"])description%1%f[%s][^>]-%scontent%s*=%s*(['\"])%w+ 2307%2")
@@ -5380,8 +5379,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     local server = response.header["server"] or ""
-    if not (have_openssl
-           and response.status == 200
+    if not (response.status == 200
            and response.body
            and (server:find("^IQinVision Embedded ")
                 and response.body:find(">IQ", 1, true)
@@ -6014,7 +6012,8 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200
+    return have_openssl
+           and response.status == 200
            and response.body
            and (response.body:find(">Milesight Network Camera", 1, true)
              or response.body:find(">IPCAM Network Camera", 1, true))
@@ -6045,7 +6044,8 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200
+    return have_openssl
+           and response.status == 200
            and response.body
            and response.body:find(">Alphafinity Network Camera", 1, true)
            and response.body:lower():find("<input%f[%s][^>]-%sid%s*=%s*(['\"]?)secret%1[%s>]")
@@ -6468,8 +6468,7 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return have_openssl
-           and response.status == 200
+    return response.status == 200
            and response.body
            and response.body:find("MM_goToURL", 1, true)
            and response.body:lower():find("<title>--- video web server ---</title>", 1, true)
