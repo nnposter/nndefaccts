@@ -5122,6 +5122,30 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Panasonic Network Camera",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("./live/index2.html?Language=", 1, true)
+           and (response.body:find("%Wlocation%.replace%((['\"])%./live/index2%.html%?Language=%d+%1")
+             or response.body:find("%Wwindow%.open%((['\"])%./live/index2%.html%?Language=%d+%1"))
+           and response.body:lower():find("<title>%a%a%-%a%w+ ")
+  end,
+  login_combos = {
+    {username = "admin", password = "12345"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port,
+                        url.absolute(path, "live/index2.html?Language=0"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sanyo Network Camera (no auth)",
   category = "security",
   paths = {
