@@ -213,7 +213,7 @@ end
 -- @param pattern to validate the cookie value
 -- @return cookie value if such a cookie is found
 ---
-local function sets_cookie (response, name, pattern)
+local function get_cookie (response, name, pattern)
   name = name:lower()
   for _, ck in ipairs(response.cookies or {}) do
     if ck.name:lower() == name and (not pattern or ck.value:find(pattern)) then
@@ -326,7 +326,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and (sets_cookie(response, "Cacti") or sets_cookie(response, "CactiEZ"))
+           and (get_cookie(response, "Cacti") or get_cookie(response, "CactiEZ"))
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -350,7 +350,7 @@ table.insert(fingerprints, {
     {path = "/zabbix/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200 and sets_cookie(response, "zbx_sessionid")
+    return response.status == 200 and get_cookie(response, "zbx_sessionid")
   end,
   login_combos = {
     {username = "admin", password = "zabbix"}
@@ -373,7 +373,7 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 302 and sets_cookie(response, "Xplico")
+    return response.status == 302 and get_cookie(response, "Xplico")
   end,
   login_combos = {
     {username = "admin", password = "xplico"},
@@ -495,7 +495,7 @@ table.insert(fingerprints, {
                                   url.absolute(path, "jsp/Login.do"),
                                   {cookies=resp1.cookies}, form2)
     return (resp2.status == 200 or resp2.status == 302)
-           and sets_cookie(resp2, "OPUTILSTICKET", "^%x+$")
+           and get_cookie(resp2, "OPUTILSTICKET", "^%x+$")
   end
 })
 
@@ -548,7 +548,7 @@ table.insert(fingerprints, {
     local loc = response.header["location"] or ""
     if not (response.status == 302
            and loc:find("/lua/login.lua?referer=", 1, true)
-           and sets_cookie(response, "session") == "") then
+           and get_cookie(response, "session") == "") then
       return false
     end
     local resp = http_get_simple(host, port, loc)
@@ -570,7 +570,7 @@ table.insert(fingerprints, {
                                   nil, form)
     return resp.status == 302
            and resp.header["location"] == path
-           and sets_cookie(resp, "user") == user
+           and get_cookie(resp, "user") == user
   end
 })
 
@@ -614,7 +614,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "SEVONE")
+           and get_cookie(response, "SEVONE")
            and response.body
            and response.body:lower():find("<title>sevone nms - network manager", 1, true)
   end,
@@ -652,7 +652,7 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 302 and sets_cookie(response, "d42amid")
+    return response.status == 302 and get_cookie(response, "d42amid")
   end,
   login_combos = {
     {username = "d42admin", password = "default"}
@@ -661,7 +661,7 @@ table.insert(fingerprints, {
     local lurl = url.absolute(path, "accounts/login/")
     local resp1 = http_get_simple(host, port, lurl .. "?next=" .. path)
     if not (resp1.status == 200 and resp1.body) then return false end
-    local form = {csrfmiddlewaretoken=sets_cookie(resp1, "d42amid_csrftoken"),
+    local form = {csrfmiddlewaretoken=get_cookie(resp1, "d42amid_csrftoken"),
                   username=user,
                   password=pass,
                   next=path}
@@ -680,7 +680,7 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 302 and sets_cookie(response, "grafana_sess")
+    return response.status == 302 and get_cookie(response, "grafana_sess")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -692,7 +692,7 @@ table.insert(fingerprints, {
     json.make_object(jin)
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
                                  {header=header}, json.generate(jin))
-    return resp.status == 200 and sets_cookie(resp, "grafana_user") == user
+    return resp.status == 200 and get_cookie(resp, "grafana_user") == user
   end
 })
 
@@ -728,7 +728,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "CLOUDERA_MANAGER_SESSIONID")
+           and get_cookie(response, "CLOUDERA_MANAGER_SESSIONID")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -755,7 +755,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "JSESSIONID", "^%x+$")
+           and get_cookie(response, "JSESSIONID", "^%x+$")
            and response.body
            and response.body:find("OpenDaylight", 1, true)
            and response.body:lower():find("<title>opendaylight ", 1, true)
@@ -847,7 +847,7 @@ table.insert(fingerprints, {
                                   nil, form)
     return resp.status == 302
            and (resp.header["location"] or ""):find("?action=admin.index", 1, true)
-           and sets_cookie(resp, "ROCK_LANG", "^[%a_]+$")
+           and get_cookie(resp, "ROCK_LANG", "^[%a_]+$")
   end
 })
 
@@ -1175,7 +1175,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "control/login"),
                                  nil, form)
     return resp.status == 200
-           and sets_cookie(resp, path:match("/([^/]+)/$") .. ".autoUserLoginId") == user
+           and get_cookie(resp, path:match("/([^/]+)/$") .. ".autoUserLoginId") == user
   end
 })
 
@@ -1189,7 +1189,7 @@ table.insert(fingerprints, {
     local loc = response.header["location"] or ""
     if not (response.status == 302
            and loc:find("/login%.html%f[;\0]")
-           and sets_cookie(response, "JSESSIONID", "^%w+$")) then
+           and get_cookie(response, "JSESSIONID", "^%w+$")) then
       return false
     end
     local resp = http_get_simple(host, port, loc)
@@ -1211,7 +1211,7 @@ table.insert(fingerprints, {
                                   nil, form)
     return resp.status == 302
            and (resp.header["location"] or ""):find("/welcome%.html$")
-           and sets_cookie(resp, "JSESSIONID", "^%w+$")
+           and get_cookie(resp, "JSESSIONID", "^%w+$")
   end
 })
 
@@ -1224,7 +1224,7 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 302
            and (response.header["location"] or ""):find("/admin%-ng/login%.html%f[;\0]")
-           and sets_cookie(response, "JSESSIONID", "^%w+$")
+           and get_cookie(response, "JSESSIONID", "^%w+$")
   end,
   login_combos = {
     {username = "admin", password = "opencast"}
@@ -1235,7 +1235,7 @@ table.insert(fingerprints, {
                                  nil, {j_username=user, j_password=pass})
     return resp.status == 302
            and (resp.header["location"] or ""):find("/admin%-ng/index%.html$")
-           and sets_cookie(resp, "JSESSIONID", "^%w+$")
+           and get_cookie(resp, "JSESSIONID", "^%w+$")
   end
 })
 
@@ -1265,7 +1265,7 @@ table.insert(fingerprints, {
                                  nil, form)
     return resp.status == 302
            and (resp.header["location"] or ""):find("/portal/server%.pt[;?]")
-           and sets_cookie(resp, "plloginoccured") == "true"
+           and get_cookie(resp, "plloginoccured") == "true"
   end
 })
 
@@ -1334,7 +1334,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "index.pl"),
                                  nil, form)
     return resp.status == 302
-           and sets_cookie(resp, "OTRSAgentInterface", "^%w+$")
+           and get_cookie(resp, "OTRSAgentInterface", "^%w+$")
   end
 })
 
@@ -1347,7 +1347,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 302
-           and sets_cookie(response, "ilClientId")
+           and get_cookie(response, "ilClientId")
            and (response.header["location"] or ""):find("%f[^/\0]login%.php%?.*%f[^?&]client_id=")
   end,
   login_combos = {
@@ -1388,7 +1388,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 302
-           and sets_cookie(response, "ilClientId")
+           and get_cookie(response, "ilClientId")
            and (response.header["location"] or ""):find("%f[^/\0]ilias%.php%f[?\0]")
   end,
   login_combos = {
@@ -1398,7 +1398,7 @@ table.insert(fingerprints, {
     local resp0 = http_get_simple(host, port, path)
     if resp0.status ~= 302 then return false end
     local form1 = {target="",
-                   client_id=sets_cookie(resp0, "ilClientId"),
+                   client_id=get_cookie(resp0, "ilClientId"),
                    cmd="force_login",
                    lang="en"}
     local furl = url.absolute(path, "login.php?" .. url.build_query(form1))
@@ -1430,7 +1430,7 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 302
            and (response.header["location"] or ""):find("%?controller=Auth/AuthController&action=login$")
-           and sets_cookie(response, "JM_SID")
+           and get_cookie(response, "JM_SID")
   end,
   login_combos = {
     {username = "admin",           password = "admin"},
@@ -1463,7 +1463,7 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 302
            and (response.header["location"] or ""):find("%?controller=AuthController&action=login$")
-           and sets_cookie(response, "KB_SID")
+           and get_cookie(response, "KB_SID")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -1681,7 +1681,7 @@ table.insert(fingerprints, {
     json.make_object(jin)
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
                                  {header=header}, json.generate(jin))
-    return resp.status == 200 and sets_cookie(resp, "sid", ".")
+    return resp.status == 200 and get_cookie(resp, "sid", ".")
   end
 })
 
@@ -1789,7 +1789,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "nikola_login.html"),
                                  nil, form)
-    return resp.status == 200 and sets_cookie(resp, "SID", ".")
+    return resp.status == 200 and get_cookie(resp, "SID", ".")
   end
 })
 
@@ -1952,7 +1952,7 @@ table.insert(fingerprints, {
     return response.status == 303
            and (response.header["server"] or ""):find("^glass/%d+%.")
            and (response.header["location"] or ""):find("/login%f[?\0]")
-           and sets_cookie(response, "sid", "^%w+$")
+           and get_cookie(response, "sid", "^%w+$")
   end,
   login_combos = {
     {username = "admin", password = "ironport"}
@@ -1967,8 +1967,8 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
                                  nil, form)
     return resp.status == 303
-           and (sets_cookie(resp, "euq_authenticated", "^%w+$")
-             or sets_cookie(resp, "authenticated", "^%w+$"))
+           and (get_cookie(resp, "euq_authenticated", "^%w+$")
+             or get_cookie(resp, "authenticated", "^%w+$"))
   end
 })
 
@@ -2027,7 +2027,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "SESSIONID", "&Huawei")
+           and get_cookie(response, "SESSIONID", "&Huawei")
   end,
   login_combos = {
     {username = "admin",       password = "Admin@123"},
@@ -2422,7 +2422,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "cgi-bin/login"),
                                  nil, form)
     return resp.status == 200
-           and sets_cookie(resp, "AIRTIESSESSION", "^%x+$")
+           and get_cookie(resp, "AIRTIESSESSION", "^%x+$")
            and (resp.body or ""):find('"0;%s*url=[^"]-/main%.html"')
   end
 })
@@ -2452,7 +2452,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "check.php"),
                                  nil, {username=user,password=pass})
     return resp.status == 200
-           and sets_cookie(resp, "PHPSESSID", "^%w+$")
+           and get_cookie(resp, "PHPSESSID", "^%w+$")
            and (resp.body or ""):find("%Wlocation%.href%s*=%s*(['\"])admin_password_change%.php%1")
   end
 })
@@ -2747,7 +2747,7 @@ table.insert(fingerprints, {
                   [":username"]=user,
                   [":password"]=pass,
                   [":action"]="login",
-                  [":sessionid"]=sets_cookie(resp1, "sessionid")}
+                  [":sessionid"]=get_cookie(resp1, "sessionid")}
     local resp2 = http_post_simple(host, port, lurl,
                                   {cookies=resp1.cookies}, form)
     return resp2.status == 302
@@ -2962,7 +2962,7 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return http_auth_realm(response) == "ADSL Modem"
            and (response.header["server"] or ""):find("^Boa/%d+%.")
-           and sets_cookie(response, "SESSIONID", "^%x+$")
+           and get_cookie(response, "SESSIONID", "^%x+$")
   end,
   login_combos = {
     {username = "admin", password = "admin"},
@@ -3215,7 +3215,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "login.cgi"),
                                  nil, {password=pass})
-    return resp.status == 200 and sets_cookie(resp, "GS108SID", ".")
+    return resp.status == 200 and get_cookie(resp, "GS108SID", ".")
   end
 })
 
@@ -3247,7 +3247,7 @@ table.insert(fingerprints, {
                   err_flag=0,
                   err_msg=""}
     local resp2 = http_post_simple(host, port, lurl, nil, form)
-    return resp2.status == 200 and sets_cookie(resp2, "SID", ".")
+    return resp2.status == 200 and get_cookie(resp2, "SID", ".")
   end
 })
 
@@ -3280,7 +3280,7 @@ table.insert(fingerprints, {
                   err_msg="",
                   submt=""}
     local resp2 = http_post_simple(host, port, lurl, nil, form)
-    return resp2.status == 200 and sets_cookie(resp2, "SID", ".")
+    return resp2.status == 200 and get_cookie(resp2, "SID", ".")
   end
 })
 
@@ -3377,7 +3377,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, path, nil, form)
     return resp.status == 302
            and resp.header["location"] == "ext-js/web-pages/login/chgpw.html"
-           and sets_cookie(resp, "authtok", "^[%w+-]+$")
+           and get_cookie(resp, "authtok", "^[%w+-]+$")
   end
 })
 
@@ -3444,7 +3444,7 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return have_openssl
            and response.status == 200
-           and sets_cookie(response, "siemens_ad_session", "^%x+")
+           and get_cookie(response, "siemens_ad_session", "^%x+")
            and response.body
            and response.body:find(" SCALANCE X ", 1, true)
            and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)noncea%1[%s>]")
@@ -3503,7 +3503,7 @@ table.insert(fingerprints, {
                  url.escape(user), url.escape(pass))
     local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return resp.status == 200
-           and sets_cookie(resp, "sessionID", ".")
+           and get_cookie(resp, "sessionID", ".")
            and (resp.body or ""):find("%Wwindow%.location%s*=%s*(['\"])mainFrame%.cgi%1")
   end
 })
@@ -3538,7 +3538,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("GlobeSurfer II", 1, true)
            and response.body:find("%Wf%.action%s*=%s*(['\"])[^'\"]-/cache/%d+/upgrade%.cgi%1")
-           and sets_cookie(response, "session_id", "^%d+$")
+           and get_cookie(response, "session_id", "^%d+$")
   end,
   login_combos = {
     {username = "admin", password = "admin"},
@@ -3577,7 +3577,7 @@ table.insert(fingerprints, {
                    transaction_id=transid,
                    lang=0,
                    user_name=user,
-                   ["password_" .. sets_cookie(resp2, "session_id")]="",
+                   ["password_" .. get_cookie(resp2, "session_id")]="",
                    md5_pass=stdnse.tohex(openssl.md5(pass .. authkey)),
                    auth_key=authkey}
     local resp3 = http_post_simple(host, port, url3,
@@ -3599,7 +3599,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("md5_pass", 1, true)
            and response.body:lower():find("<title>[^<]-globesurfer%W")
-           and sets_cookie(response, "rg_cookie_session_id", "^%d+$")
+           and get_cookie(response, "rg_cookie_session_id", "^%d+$")
   end,
   login_combos = {
     {username = "admin", password = "admin"},
@@ -3624,7 +3624,7 @@ table.insert(fingerprints, {
                   auth_key=authkey,
                   lang=0,
                   username=user,
-                  ["password_" .. sets_cookie(resp1, "rg_cookie_session_id")]=""}
+                  ["password_" .. get_cookie(resp1, "rg_cookie_session_id")]=""}
     local resp2 = http_post_simple(host, port, url.absolute(path, "index.cgi"),
                   {cookies=resp1.cookies}, form)
     return resp2.status == 302
@@ -3643,7 +3643,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("TransPort WR", 1, true)
            and response.body:lower():find("<title>transport wr", 1, true)
-           and sets_cookie(response, "SID", "^%x+$")
+           and get_cookie(response, "SID", "^%x+$")
   end,
   login_combos = {
     {username = "username", password = "password"}
@@ -3700,7 +3700,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "tt_adm", "^%l+$")
+           and get_cookie(response, "tt_adm", "^%l+$")
            and response.body
            and response.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"])[^'\"]-%?pageid=%w+%1")
            and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)pass_login%1[%s>]")
@@ -3717,7 +3717,7 @@ table.insert(fingerprints, {
     local resp2 = http_post_simple(host, port, url.absolute(path, lurl), nil,
                                   {user_login=user,pass_login=pass})
     return resp2.status == 200
-           and url.unescape(sets_cookie(resp2, "tt_adm", "%%3[Aa]") or ""):find(":" .. user .. ":", 1, true)
+           and url.unescape(get_cookie(resp2, "tt_adm", "%%3[Aa]") or ""):find(":" .. user .. ":", 1, true)
   end
 })
 
@@ -3729,7 +3729,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "tt_adm", "^%l+$")
+           and get_cookie(response, "tt_adm", "^%l+$")
            and response.body
            and response.body:find("900 VSAT", 1, true)
            and response.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"])[^'\"]-%?pageid=administration%1")
@@ -3746,7 +3746,7 @@ table.insert(fingerprints, {
     local resp2 = http_post_simple(host, port, url.absolute(path, lurl), nil,
                                   {user_login=user,pass_login=pass})
     return resp2.status == 200
-           and url.unescape(sets_cookie(resp2, "tt_adm", "%%3[Aa]") or ""):find(":" .. user .. ":", 1, true)
+           and url.unescape(get_cookie(resp2, "tt_adm", "%%3[Aa]") or ""):find(":" .. user .. ":", 1, true)
   end
 })
 
@@ -3808,7 +3808,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("NetComm", 1, true)
            and response.body:lower():find("/netcomm_gui_banner.jpg", 1, true)
-           and sets_cookie(response, "_appwebSessionId_", "^%x+$")
+           and get_cookie(response, "_appwebSessionId_", "^%x+$")
   end,
   login_combos = {
     {username = "root", password = "admin"},
@@ -3832,7 +3832,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find(">3G17Wn", 1, true)
-           and sets_cookie(response, "_appwebSessionId_", "^%x+$")
+           and get_cookie(response, "_appwebSessionId_", "^%x+$")
   end,
   login_combos = {
     {username = "admin", password = "admin"}
@@ -3938,7 +3938,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "xml/Connect.xml"),
                                  {header=header}, msg)
-    return resp.status == 200 and sets_cookie(resp, "token", "^%d+$")
+    return resp.status == 200 and get_cookie(resp, "token", "^%d+$")
   end
 })
 
@@ -4156,7 +4156,7 @@ table.insert(fingerprints, {
                                  nil, form)
     return resp.status == 302
            and resp.header["location"] == path
-           and sets_cookie(resp, "PHPSESSID", "^%x+$")
+           and get_cookie(resp, "PHPSESSID", "^%x+$")
   end
 })
 
@@ -4189,7 +4189,7 @@ table.insert(fingerprints, {
                                   {cookies=resp1.cookies}, form)
     return resp2.status == 302
            and resp2.header["location"] == path
-           and sets_cookie(resp2, "PHPSESSID", "^%w+$")
+           and get_cookie(resp2, "PHPSESSID", "^%w+$")
   end
 })
 
@@ -4245,7 +4245,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "tmui/logmein.html?"),
                                  {header=header}, {username=user,passwd=pass})
     return resp.status == 302
-           and sets_cookie(resp, "BIGIPAuthCookie", "^%x+$")
+           and get_cookie(resp, "BIGIPAuthCookie", "^%x+$")
   end
 })
 
@@ -4303,7 +4303,7 @@ table.insert(fingerprints, {
                                  nil, form)
     return resp.status == 302
            and (resp.header["location"] or ""):find("/menu/neo$")
-           and sets_cookie(resp, "startupapp") == "neo"
+           and get_cookie(resp, "startupapp") == "neo"
   end
 })
 
@@ -4453,7 +4453,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "index.php/verifyLogin/login"),
                                  nil, {usernameId=user, passwordId=pass})
     return resp.status == 200
-           and sets_cookie(resp, "ci_session", "USERNAME")
+           and get_cookie(resp, "ci_session", "USERNAME")
   end
 })
 
@@ -4510,7 +4510,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "dologin"),
                                  nil, {P2=pass,Login="Login",gnkey="0b82"})
-    return resp.status == 200 and sets_cookie(resp, "session_id", "^%x+$")
+    return resp.status == 200 and get_cookie(resp, "session_id", "^%x+$")
   end
 })
 
@@ -4537,7 +4537,7 @@ table.insert(fingerprints, {
                   time=math.floor(stdnse.clock_ms())}
     local resp = http_get_simple(host, port,
                                 url.absolute(path, "manager?" .. url.build_query(form)))
-    return resp.status == 200 and sets_cookie(resp, "phonecookie", "^%x+$")
+    return resp.status == 200 and get_cookie(resp, "phonecookie", "^%x+$")
   end
 })
 
@@ -4833,7 +4833,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "page.cmd"),
                                  nil, form)
     return resp.status == 200
-           and sets_cookie(resp, "webm", "%d+|[%d-]*[1-9a-f][%d-]*")
+           and get_cookie(resp, "webm", "%d+|[%d-]*[1-9a-f][%d-]*")
   end
 })
 
@@ -5377,7 +5377,7 @@ table.insert(fingerprints, {
     return have_openssl
            and response.status == 403
            and (response.header["server"] or ""):find("^IQinVision Embedded ")
-           and sets_cookie(response, "SrvrNonce", "^%x+")
+           and get_cookie(response, "SrvrNonce", "^%x+")
   end,
   login_combos = {
     {username = "login", password = "access"},
@@ -5385,7 +5385,7 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local resp1 = http_get_simple(host, port, path)
-    local nonce = sets_cookie(resp1, "SrvrNonce")
+    local nonce = get_cookie(resp1, "SrvrNonce")
     if not nonce then return false end
     local creds = stdnse.tohex(openssl.md5(table.concat({nonce, user,
                                                          pass:upper()}, ":")))
@@ -5441,7 +5441,7 @@ table.insert(fingerprints, {
     end
     local resp = http_get_simple(host, port, url.absolute(path, "accessset.html"))
     return resp.status == 403
-           and sets_cookie(resp, "SrvrNonce", "^%x+")
+           and get_cookie(resp, "SrvrNonce", "^%x+")
   end,
   login_combos = {
     {username = "root", password = "system"}
@@ -5449,7 +5449,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local lurl = url.absolute(path, "accessset.html")
     local resp1 = http_get_simple(host, port, lurl)
-    local nonce = sets_cookie(resp1, "SrvrNonce")
+    local nonce = get_cookie(resp1, "SrvrNonce")
     if not nonce then return false end
     local creds = stdnse.tohex(openssl.md5(table.concat({nonce, user,
                                                          pass:upper()}, ":")))
@@ -5693,7 +5693,7 @@ table.insert(fingerprints, {
                                   url.absolute(path, "LoginPC.cgi"),
                                   nil, form)
     return resp2.status == 200
-           and sets_cookie(resp2, "CLIENT_ID", "^%d+$")
+           and get_cookie(resp2, "CLIENT_ID", "^%d+$")
   end
 })
 
@@ -6784,8 +6784,8 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local lurl = url.absolute(path, "api/getCurrentUser")
     local resp1 = http_get_simple(host, port, lurl, {cookies="Authorization=Digest"})
-    local realm = sets_cookie(resp1, "realm")
-    local nonce = sets_cookie(resp1, "nonce")
+    local realm = get_cookie(resp1, "realm")
+    local nonce = get_cookie(resp1, "nonce")
     if not (resp1.status == 401 and realm and nonce) then return false end
     user = user:lower()
     local hashfnc = function (...)
@@ -6911,7 +6911,7 @@ table.insert(fingerprints, {
                                   nil, form2)
     return resp2.status == 302
            and (resp2.header["location"] or ""):find("/index%.zht$")
-           and sets_cookie(resp2, "DCRABBIT", "^%-?%d+$")
+           and get_cookie(resp2, "DCRABBIT", "^%-?%d+$")
   end
 })
 
@@ -7090,7 +7090,7 @@ table.insert(fingerprints, {
     if not lurl then return false end
     lurl = url.absolute(path, lurl)
     local resp1 = http_get_simple(host, port, lurl)
-    local nonce = resp1.status == 403 and sets_cookie(resp1, "SrvrNonce", ".")
+    local nonce = resp1.status == 403 and get_cookie(resp1, "SrvrNonce", ".")
     if not nonce then return false end
     local creds = stdnse.tohex(openssl.md5(nonce .. ":" .. pass:upper()))
     local cookies = ("SrvrNonce=%s; SrvrCreds=%s"):format(nonce, creds)
@@ -7299,7 +7299,7 @@ table.insert(fingerprints, {
     local lurl = ("taco.cgi?F0=AH&F1=%d&F2=%s"):format(usermap[user],pass)
     local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return resp.status == 200
-           and (sets_cookie(resp, "DCRABBIT") or ""):lower() == user:lower()
+           and (get_cookie(resp, "DCRABBIT") or ""):lower() == user:lower()
   end
 })
 
@@ -7640,7 +7640,7 @@ table.insert(fingerprints, {
     return response.status == 302
            and response.header["location"] == "?/3/login"
            and (response.header["server"] or ""):find("^lighttpd/%d+%.")
-           and sets_cookie(response, "PHPSESSID", "^%w+$")
+           and get_cookie(response, "PHPSESSID", "^%w+$")
   end,
   login_combos = {
     {username = "00000000", password = "00000000"}
@@ -7713,7 +7713,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "login.cgi"),
                                  nil, {name=user,password=pass})
     return resp.status == 200
-           and sets_cookie(resp, "DCRABBIT", "^%d+$")
+           and get_cookie(resp, "DCRABBIT", "^%d+$")
            and (resp.body or ""):find("%Wlocation%s*=%s*(['\"])index%.ztm%1")
   end
 })
@@ -7970,7 +7970,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
                                  nil, form)
     return resp.status == 302
-           and sets_cookie(resp, "com.canon.meap.service.login.session", "^%-?%d+$")
+           and get_cookie(resp, "com.canon.meap.service.login.session", "^%-?%d+$")
   end
 })
 
@@ -8003,7 +8003,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "start/login.cgi"),
                                  nil, form)
     return resp.status == 200
-           and sets_cookie(resp, "level") == "3"
+           and get_cookie(resp, "level") == "3"
   end
 })
 
@@ -8068,7 +8068,7 @@ table.insert(fingerprints, {
     local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=lurl}))}
     local resp = http_post_simple(host, port, lurl, {header=header}, form)
     return resp.status == 200
-           and sets_cookie(resp, "level") == "1"
+           and get_cookie(resp, "level") == "1"
   end
 })
 
@@ -8108,7 +8108,7 @@ table.insert(fingerprints, {
                                   {cookies=resp1.cookies}, form)
     return resp2.status == 302
            and (resp2.header["location"] or ""):find("/mainFrame%.cgi$")
-           and sets_cookie(resp2, "wimsesid", "^%d+$")
+           and get_cookie(resp2, "wimsesid", "^%d+$")
   end
 })
 
@@ -8187,7 +8187,7 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local resp1 = http_get_simple(host, port, path)
-    local token = resp1.status == 200 and sets_cookie(resp1, "session", ".")
+    local token = resp1.status == 200 and get_cookie(resp1, "session", ".")
     if not token then return false end
     local ipaddr = token:match("^(.+)%.")
     if not ipaddr then return false end
@@ -8258,7 +8258,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "ADMIN/Login"),
                                  nil, {USERNAME=user,PASS=pass})
-    return resp.status == 301 and sets_cookie(resp, "sessid", "^0,%x+$")
+    return resp.status == 301 and get_cookie(resp, "sessid", "^0,%x+$")
   end
 })
 
@@ -8965,7 +8965,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return response.status == 200
-           and sets_cookie(response, "PHPSESSID", "^%x+$")
+           and get_cookie(response, "PHPSESSID", "^%x+$")
            and response.body
            and response.body:find("/cgi-bin/login_mgr.cgi", 1, true)
            and response.body:find("%Wcmd:%s*(['\"])wd_login%1")
@@ -9074,7 +9074,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "SE/app"),
                                  nil, {user=user, passwd=pass})
     return resp.status == 200
-           and sets_cookie(resp, "JSESSIONID", ".")
+           and get_cookie(resp, "JSESSIONID", ".")
            and (resp.body or ""):find("=%s*['\"]login=success&")
   end
 })
@@ -9179,7 +9179,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "cgi-bin/login"),
                                  nil, {password_value=pass, idle_timeout=60})
-    return resp.status == 302 and sets_cookie(resp, "session_id", "^%x+$")
+    return resp.status == 302 and get_cookie(resp, "session_id", "^%x+$")
   end
 })
 
@@ -9237,7 +9237,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, path, nil, form)
     return resp.status == 302
            and (resp.header["location"] or ""):find("/home%.php$")
-           and sets_cookie(resp, "avctSessionId", "^%d+$")
+           and get_cookie(resp, "avctSessionId", "^%d+$")
   end
 })
 
@@ -9252,7 +9252,7 @@ table.insert(fingerprints, {
     local resp = http_get_simple(host, port,
                                 url.absolute(path, "appliance/"))
     return resp.status == 302
-           and sets_cookie(resp, "gw_s", "^%w+$")
+           and get_cookie(resp, "gw_s", "^%w+$")
            and (resp.header["location"] or ""):find("/appliance/login%.ns$")
   end,
   login_combos = {
@@ -9430,7 +9430,7 @@ table.insert(fingerprints, {
                                  nil, {loginId=user, password=pass})
     return resp.status == 200
            and (resp.body or ""):lower():find('"0;%s*url=[^"]-/home%.html"')
-           and sets_cookie(resp, "MPID", "^%x+$")
+           and get_cookie(resp, "MPID", "^%x+$")
   end
 })
 
