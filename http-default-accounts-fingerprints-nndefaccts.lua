@@ -7357,6 +7357,29 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Heatmiser Wifi Thermostat",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Heatmiser", 1, true)
+           and response.body:lower():find("<title>heatmiser wifi thermostat</title>", 1, true)
+           and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)lgpw%1[%s>]")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port, path, nil, {lgnm=user,lgpw=pass})
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/main%.htm$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Heatmiser NetMonitor 1.x",
   category = "industrial",
   paths = {
