@@ -7524,6 +7524,29 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Proliphix Thermostat",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("index.shtml", 1, true)
+           and response.body:find("%WprintNavLine%(%s*(['\"])Login%1%s*,%s*(['\"])index%.shtml%2%s*%)")
+           and response.body:lower():find("<title>thermostat [^<]-%- status &amp; control</title>")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "user",  password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "index.shtml"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "CS121 UPS Web/SNMP Manager",
   category = "industrial",
   paths = {
