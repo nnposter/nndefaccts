@@ -3363,7 +3363,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("ZyWALL", 1, true)
-           and response.body:lower():find("<title>zywall [%u%d]")
+           and response.body:lower():find("<title>zywall %w")
            and response.body:lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)pwd_r%1[%s>]")
   end,
   login_combos = {
