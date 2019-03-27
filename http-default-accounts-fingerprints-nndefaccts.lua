@@ -5863,25 +5863,6 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "OEM Boa/M IP Camera",
-  category = "security",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    return response.status == 401
-           and (http_auth_realm(response) or ""):find(" IP Camera$")
-           and (response.header["server"] or ""):find("^Boa/%d+%.")
-  end,
-  login_combos = {
-    {username = "admin", password = "admin"}
-  },
-  login_check = function (host, port, path, user, pass)
-    return try_http_auth(host, port, path, user, pass, false)
-  end
-})
-
-table.insert(fingerprints, {
   name = "TI Megapixel IP Camera",
   category = "security",
   paths = {
@@ -5945,6 +5926,25 @@ table.insert(fingerprints, {
            and get_cookie(resp, "user") == user
            and get_cookie(resp, "password") == pass
            and get_cookie(resp, "usrLevel") == "0"
+  end
+})
+
+table.insert(fingerprints, {
+  name = "OEM Boa/M IP Camera",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 401
+           and (http_auth_realm(response) or ""):find(" IP Camera$")
+           and (response.header["server"] or ""):find("^Boa/%d+%.")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
   end
 })
 
@@ -6087,8 +6087,7 @@ table.insert(fingerprints, {
     local userno = {admin=0, operator=1, viewer=2}
     local creds = {tostring(userno[user]),
                    url.escape(user),
-                   url.escape(pass)
-                   }
+                   url.escape(pass)}
     local lurl = "vb.htm?language=ie&checkpassword=" .. table.concat(creds, ":")
     local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return resp.status == 200
