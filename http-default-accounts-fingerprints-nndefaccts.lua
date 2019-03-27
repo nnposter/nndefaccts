@@ -5900,6 +5900,55 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "MayGion Camera (no auth)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.header["server"] == "WebServer(IPCamera_Logo)"
+           and response.body
+           and response.body:lower():find("<iframe%f[%s][^>]-%ssrc%s*=%s*(['\"]?)video%.htm%1[%s>]")
+  end,
+  login_combos = {
+    {username = "", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    return true
+  end
+})
+
+table.insert(fingerprints, {
+  name = "MayGion Camera",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.header["server"] == "WebServer(IPCamera_Logo)"
+           and response.body
+           and response.body:find("login.xml", 1, true)
+  end,
+  login_combos = {
+    {username = "admin",   password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {user=user,
+                  usr=user,
+                  password=pass,
+                  pwd=pass}
+    local lurl = "login.xml?" .. url.build_query(form)
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and get_cookie(resp, "user") == user
+           and get_cookie(resp, "password") == pass
+           and get_cookie(resp, "usrLevel") == "0"
+  end
+})
+
+table.insert(fingerprints, {
   name = "OEM Netcam",
   category = "security",
   paths = {
