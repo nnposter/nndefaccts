@@ -2983,6 +2983,26 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Westell",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 302
+           and (response.header["location"] or ""):find("/htmlV/PasswordChange%.asp$")
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port,
+                        url.absolute(path, "htmlV/PasswordChange.asp"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Zoom ADSL X5",
   category = "routers",
   paths = {
