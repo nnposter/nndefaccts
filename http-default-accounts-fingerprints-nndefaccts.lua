@@ -6365,6 +6365,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "ITX Web Remote Viewer",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if response.status == 200
+       and response.body:find('"0;%s*url=[^"]-/redirect%.html"') then
+      response = http_get_simple(host, port, url.absolute(path, "redirect.html"))
+    end
+    return http_auth_realm(response) == "WEB Remote Viewer"
+  end,
+  login_combos = {
+    {username = "ADMIN", password = "1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "html/versioninfo.htm"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "JVC VN-xxx Camera",
   category = "security",
   paths = {
