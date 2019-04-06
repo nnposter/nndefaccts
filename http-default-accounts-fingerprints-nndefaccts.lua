@@ -6620,6 +6620,31 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "AVTech IP Camera",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/nobody/", 1, true)
+           and response.body:lower():find("<title>::: login :::</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local creds = base64.enc(user .. ":" .. pass)
+    local lurl = ("cgi-bin/nobody/VerifyCode.cgi?account=%s&rnd=%.15f"):format(
+                 creds, math.random())
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and get_cookie(resp, "SSID") == creds
+  end
+})
+
+table.insert(fingerprints, {
   name = "LILIN NVR",
   category = "security",
   paths = {
