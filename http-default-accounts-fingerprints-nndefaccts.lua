@@ -6645,6 +6645,27 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "EverFocus ECORHD",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response) or ""
+    return realm:find("^ECOR%d+%-[%u%d]+$")
+           or realm:find("^ELUX%d+$")
+  end,
+  login_combos = {
+    {username = "admin", password = "11111111"},
+    {username = "user1", password = "11111111"},
+    {username = "user2", password = "11111111"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "LILIN NVR",
   category = "security",
   paths = {
