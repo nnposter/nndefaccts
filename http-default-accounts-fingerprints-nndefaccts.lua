@@ -5978,7 +5978,7 @@ table.insert(fingerprints, {
     return (http_auth_realm(response) or ""):find("^[Nn]etcam$")
   end,
   login_combos = {
-    {username = "admin", password = "admin"},
+    {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
@@ -8060,17 +8060,19 @@ table.insert(fingerprints, {
     {username = "", password = "sma"}
   },
   login_check = function (host, port, path, user, pass)
-    local resp1 = http_post_simple(host, port,
-                                  url.absolute(path, "home_frameset.htm?Logout=true"),
-                                  nil, {ButtonLogin="Abmelden"})
-    if resp1.status ~= 200 then return false end
     local form = {Language="en",
                   Password=pass,
                   ButtonLogin="Login"}
-    local resp2 = http_post_simple(host, port, url.absolute(path, "login"),
-                                  nil, form)
-    return resp2.status == 200
-           and (resp2.body or ""):find("top.frames[2].location.reload()", 1, true)
+    local resp = http_post_simple(host, port, url.absolute(path, "login"),
+                                 nil, form)
+    if not (resp.status == 200
+           and (resp.body or ""):find("top.frames[2].location.reload()", 1, true)) then
+      return false
+    end
+    http_post_simple(host, port,
+                    url.absolute(path, "home_frameset.htm?Logout=true"),
+                    nil, {ButtonLogin="Abmelden"})
+    return true
   end
 })
 
