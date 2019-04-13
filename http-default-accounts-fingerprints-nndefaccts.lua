@@ -6666,6 +6666,42 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Interlogix truVision",
+  category = "security",
+  paths = {
+    {path = "/index.asp"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.header["server"] == "Interlogix-Webs"
+           and response.body
+           and response.body:find("%Wwindow%.location%.href%s*=%s*(['\"])doc/page/login%.asp%1")
+  end,
+  login_combos = {
+    {username = "admin", password = "1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Content-Type"]="text/xml"}
+    local creds = {username = user, password = pass, digest = false}
+    local ipaddr = ("192.168.%d.%d"):format(math.random(254), math.random(254))
+    local macaddr = random_hex(12):gsub("..", ":%1"):sub(2)
+    local msg = [[
+      <?xml version="1.0" encoding="utf-8"?>
+      <userCheck>
+        <ipAddress>__IPADDR__</ipAddress>
+        <macAddress>__MACADDR__</macAddress>
+      </userCheck>]]
+    msg = msg:gsub("^%s+", ""):gsub("\n%s*", "")
+    msg = msg:gsub("__%w+__", {__IPADDR__=ipaddr, __MACADDR__=macaddr})
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "PSIA/Custom/SelfExt/userCheckEx"),
+                                 {header=header, auth=creds}, msg)
+    return resp.status == 200
+           and (resp.body or ""):find("<statusValue>200</statusValue>", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "LILIN NVR",
   category = "security",
   paths = {
