@@ -5488,6 +5488,8 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 200
            and response.header["server"] == "Sentry360"
+           and response.body
+           and response.body:lower():find("<img%f[%s][^>]-%ssrc%s*=%s*(['\"])logo_cam_page%.png%1")
   end,
   login_combos = {
     {username = "Admin", password = "1234"}
