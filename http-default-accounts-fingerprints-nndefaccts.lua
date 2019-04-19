@@ -5650,6 +5650,43 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "exacqVision",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and response.body
+           and response.body:find("%Wlocation%.replace%(%s*(['\"])login%.web%1%s*%)%s*;")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "login.web"))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("exacqVision", 1, true)
+           and resp.body:lower():find("<title>login</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin256"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {u=user,
+                  p=pass,
+                  l=1,
+                  s=0,
+                  output="json",
+                  responseVersion=2,
+                  save=1}
+    local resp = http_post_simple(host, port, url.absolute(path, "login.web"),
+                                 nil, form)
+    if not (resp.status == 200 and resp.body) then return false end
+    local jstatus, jout = json.parse(resp.body)
+    return jstatus and jout.login and jout.success
+  end
+})
+
+table.insert(fingerprints, {
   name = "GeoVision Camera",
   category = "security",
   paths = {
