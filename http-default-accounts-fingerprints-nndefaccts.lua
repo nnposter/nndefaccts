@@ -6565,6 +6565,49 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Truen TCAM (var.1)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/user/view.html", 1, true)
+           and response.body:lower():find("<frame%f[%s][^>]-%ssrc%s*=%s*(['\"]?)[^'\"]-/user/view%.html%1[%s>]")
+           and response.body:lower():find("<title>video surveillance</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "user/view.html"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Truen TCAM (var.2)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local _, loc = (response.body or ""):lower():match('"0;%s*url=(\'?)([^"\']-/user/view%.html)%1"')
+    if not (response.status == 200 and loc) then return false end
+    local resp = http_get_simple(host, port, loc)
+    return (http_auth_realm(resp) or ""):find("^IPVideo_%x+$")
+  end,
+  login_combos = {
+    {username = "admin", password = "1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "user/view.html"),
+                        user, pass, "any")
+  end
+})
+
+table.insert(fingerprints, {
   name = "TVT DVR",
   category = "security",
   paths = {
