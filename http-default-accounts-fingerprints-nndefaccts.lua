@@ -6355,6 +6355,93 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Network Video Server (var.1)",
+  category = "security",
+  paths = {
+    {path = "/login.asp"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("onLoginNVS", 1, true)
+           and response.body:lower():find("<title>web service</title>", 1, true)
+           and response.body:lower():find("<script%f[%s][^>]-%sevent%s*=%s*['\"]cbk_loginresult%(")
+           and response.body:lower():find("<script%f[%s][^>]-%sfor%s*=%s*(['\"])webcms%1")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {username=user,
+                  password=pass,
+                  UserID=math.random(10000000, 99999999)}
+    local lurl = url.absolute(path, "webs/loginCMS") .. "?"
+                 .. url.build_query(form)
+    local resp = http_get_simple(host, port, lurl)
+    return resp.status == 200
+           and (resp.body or ""):find("<level>%d</level>")
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Network Video Server (var.2)",
+  category = "security",
+  paths = {
+    {path = "/login.asp"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("onLoginNVS", 1, true)
+           and response.body:lower():find("<title>web service</title>", 1, true)
+           and response.body:lower():find("<script%f[%s][^>]-%sevent%s*=%s*['\"]cbk_loginresult%(")
+           and response.body:lower():find("<script%f[%s][^>]-%sfor%s*=%s*(['\"])netvideox%1")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {username=user,
+                  password=pass,
+                  UserID=math.random(10000000, 99999999)}
+    local lurl = url.absolute(path, "webs/httplogin") .. "?"
+                 .. url.build_query(form)
+    local resp = http_get_simple(host, port, lurl)
+    return resp.status == 200
+           and (resp.body or ""):find("<level>%d</level>")
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Network Video Server (var.3)",
+  category = "security",
+  paths = {
+    {path = "/login.asp"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("onLoginNVS", 1, true)
+           and response.body:lower():find("<script%f[%s][^>]-%sevent%s*=%s*['\"]callbackloginstate%(")
+           and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*(['\"])script/base64%.js%1")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {action="list",
+                  group="LOGIN",
+                  UserID=math.random(10000000, 99999999)}
+    local lurl = url.absolute(path, "cgi-bin/login.cgi") .. "?"
+                 .. url.build_query(form)
+    local resp = http_get_simple(host, port, lurl,
+                                {auth={username=user, password=pass}})
+    return resp.status == 200
+           and (resp.body or ""):find("%f[%w]root.ERR.no=0%f[^%w]")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Pravis Systems DVR",
   category = "security",
   paths = {
