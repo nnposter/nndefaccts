@@ -3503,6 +3503,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Siemens RUGGEDCOM WIN",
+  cpe = "cpe:/h:siemens:ruggedcom_win*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return http_auth_realm(response) == ""
+           and get_cookie(response, "sessionId", "^%d+$")
+           and (response.header["server"] or ""):find("^BS/%d+%.")
+  end,
+  login_combos = {
+    {username = "admin", password = "generic"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not get_cookie(resp1, "sessionId", "^%d+$") then return false end
+    local resp2 = http_get_simple(host, port, path,
+                                  {cookies=resp1.cookies,
+                                  auth={username=user,password=pass}})
+    return resp2.status == 200
+           and resp2.body:lower():find('"0;%s*url=[^"]-/0/m%d+"')
+  end
+})
+
+table.insert(fingerprints, {
   name = "Foxconn Femtocell",
   category = "routers",
   paths = {
