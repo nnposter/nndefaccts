@@ -14,6 +14,8 @@ To various degrees, checking for default credentials is possible with other well
 Besides good coverage, scanning for default usernames and passwords with Nmap and the NNdefaccts dataset is straightforward, lightweight, and fast. A target on a local network can be typically tested in less than 30 seconds from start to finish.
 
 ## Installation, Usage
+The dataset requires Nmap 7.60 or higher. For best results please build Nmap fresh from its code repository.
+
 For simple one-off use, just copy file `http-default-accounts-fingerprints-nndefaccts.lua` to your home directory and, instead of running:
 ```
 nmap --script http-default-accounts -p 80 192.168.1.1
