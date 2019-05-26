@@ -84,6 +84,16 @@ local function random_alnum (len)
 end
 
 ---
+-- Generates a random hexadecimal string.
+--
+-- @param len Length of the output string.
+-- @return A random string consisting of hexadecimal digits
+---
+local function random_hex (len)
+  return rand.random_string(len, "0123456789abcdef")
+end
+
+---
 -- Backwards compatibility provisions for library tableaux
 ---
 if not have_tableaux then
