@@ -3539,6 +3539,84 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Siemens RUGGEDCOM ROS (var.1)",
+  cpe = "cpe:/o:siemens:ruggedcom_rugged_operating_system",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302
+           and loc:find("/InitialPage%.asp$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("RuggedSwitch Operating System", 1, true)
+           and resp.body:lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)menu%.asp%?uid=%d+%1[ >]")
+  end,
+  login_combos = {
+    {username = "admin",    password = "admin"},
+    {username = "operator", password = "operator"},
+    {username = "guest",    password = "guest"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(path, "InitialPage.asp"))
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local lurl = resp1.body:match("<a%f[%s][^>]-%shref%s*=%s*['\"]?(Menu%.asp%?UID=%d+)")
+    if not lurl then return false end
+    local lurl = url.absolute(path, lurl)
+    local resp2 = http_get_simple(host, port, lurl)
+    if resp2.status ~= 401 then return false end
+    return try_http_auth(host, port, lurl, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Siemens RUGGEDCOM ROS (var.2)",
+  cpe = "cpe:/o:siemens:ruggedcom_rugged_operating_system",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302
+           and loc:find("/InitialPage%.asp$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("goahead.gif", 1, true)
+           and resp.body:find("LogIn", 1, true)
+           and resp.body:lower():find("<form%f[%s][^>]-%saction%s*=%s*(['\"]?)[^'\"]-/goform/postlogindata%?uid=%d+%1[ >]")
+  end,
+  login_combos = {
+    {username = "admin",    password = "admin"},
+    {username = "operator", password = "operator"},
+    {username = "guest",    password = "guest"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(path, "InitialPage.asp"))
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local lurl = resp1.body:match("<form%f[%s][^>]-%saction%s*=%s*['\"]?([^'\"]-/goform/postLoginData%?UID=%d+)")
+    if not lurl then return false end
+    local form = {User=user,
+                  Password=pass,
+                  choice="LogIn"}
+    local resp2 = http_post_simple(host, port, url.absolute(path, lurl),
+                                  nil, form)
+    return (resp2.status == 203 or resp2.status == 200)
+           and (resp2.body or ""):lower():find("<a%f[%s][^>]-%shref%s*=%s*(['\"]?)[^'\"]-/logout%.asp%?uid=%d+%1[ >]")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Foxconn Femtocell",
   category = "routers",
   paths = {
