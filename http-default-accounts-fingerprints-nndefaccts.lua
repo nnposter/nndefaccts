@@ -3617,6 +3617,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Siemens RUGGEDCOM ROX",
+  category = "routers",
+  paths = {
+    {path = "/login.html"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/skins/macified/styles/master.css", 1, true)
+           and response.body:find("confdLogin();", 1, true)
+           and response.body:lower():find("<a%f[%s][^>]-%sonclick%s*=%s*['\"]confdlogin%(%);")
+           and response.body:lower():find("<body%f[%s][^>]-%sonload%s*=%s*['\"]loadbannercontent%(%);")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "oper",  password = "oper"},
+    {username = "guest", password = "guest"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port, url.absolute(path, "confd/login"),
+                                 nil, {user=user,passwd=pass})
+    return resp.status == 200
+           and (resp.body or ""):find("^(['\"])sess%d+%1$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Foxconn Femtocell",
   category = "routers",
   paths = {
