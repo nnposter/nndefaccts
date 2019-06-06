@@ -5945,6 +5945,27 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Arecont Vision (no auth)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">Arecont Vision", 1, true)
+           and response.body:lower():find("<title>arecont vision camera</title>", 1, true)
+           and response.body:lower():find("<div%f[%s][^>]-%sclass%s*=%s*(['\"])avmenu%1")
+  end,
+  login_combos = {
+    {username = "", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    return true
+  end
+})
+
+table.insert(fingerprints, {
   name = "Arecont Vision (basic auth)",
   category = "security",
   paths = {
