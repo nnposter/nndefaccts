@@ -9227,15 +9227,17 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "HP Storage Management Utility",
+  name = "HP StorageWorks SMU",
   category = "storage",
   paths = {
-    {path = "/api/id/"}
+    {path = "/"}
   },
   target_check = function (host, port, path, response)
     return have_openssl
            and response.status == 200
-           and (response.header["command-status"] or ""):find("^0 %({%s*systemName:.*,%s*controller:.*}%)")
+           and response.body
+           and response.body:find("checkAuthentication", 1, true)
+           and response.body:lower():find("<script%f[%s][^>]-%ssrc%s*=%s*(['\"])js/js_brandstrings%.js%1")
   end,
   login_combos = {
     {username = "monitor", password = "!monitor"},
@@ -9246,7 +9248,7 @@ table.insert(fingerprints, {
     local creds = stdnse.tohex(openssl.md5(user .. "_" .. pass))
     local header = {["Content-Type"] = "application/x-www-form-urlencoded",
                     ["datatype"] = "json"}
-    local resp = http_post_simple(host, port, url.absolute(path, "../"),
+    local resp = http_post_simple(host, port, url.absolute(path, "api/"),
                                  {header=header}, "/api/login/" .. creds)
     return resp.status == 200
            and (resp.header["command-status"] or ""):find("^1 ")
