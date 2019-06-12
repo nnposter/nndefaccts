@@ -9256,6 +9256,47 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "HP 3PAR SSMC",
+  category = "storage",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("StoreServ Management Console", 1, true)
+           and response.body:lower():find("<title>storeserv management console</title>")
+           and response.body:lower():find("<link%f[%s][^>]-%shref%s*=%s*['\"]ssmc/css/")
+  end,
+  login_combos = {
+    {username = "", password = ""},
+    {username = "3paradm",  password = "3pardata"},
+    {username = "3parcust", password = "3parInServ"}
+  },
+  login_check = function (host, port, path, user, pass)
+    if user == "" then
+      local resp = http_get_simple(host, port,
+                                  url.absolute(path, "foundation/REST/trustedservice/admincredentials"))
+      if not (resp.status == 200 and resp.body) then return false end
+      local jstatus, jout = json.parse(resp.body)
+      return jstatus and jout.isAdminPasswordSet == false
+    end
+    local header = {["Accept"] = "application/json, text/plain, */*",
+                    ["Content-Type"] = "application/json;charset=utf-8"}
+    local jin = {username=user,
+                 password=pass,
+                 adminLogin=false,
+                 authLoginDomain="LOCAL"}
+    json.make_object(jin)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "foundation/REST/sessionservice/sessions"),
+                                 {header=header}, json.generate(jin))
+    return resp.status == 201
+           and (resp.header["location"] or ""):find("/foundation/REST/sessionservice/sessions/%w+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "IBM Storwize V3700",
   cpe = "cpe:/a:ibm:storwize_v3700_software",
   category = "storage",
