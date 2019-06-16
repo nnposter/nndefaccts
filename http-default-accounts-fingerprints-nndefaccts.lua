@@ -1718,7 +1718,7 @@ table.insert(fingerprints, {
                                   {cookies = resp1.cookies},
                                   {type="identify_user",data=ctext})
     if not (resp2.status == 200 and resp2.body) then return false end
-    jstatus, jout = json.parse(resp2.body)
+    local jstatus, jout = json.parse(resp2.body)
     return jstatus and jout[1] and jout[1].value == randstr
   end
 })
@@ -4604,7 +4604,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "mgmt/shared/authn/login"),
                                  {header=header}, json.generate(jin))
     if not (resp.status == 200 and resp.body) then return false end
-    jstatus, jout = json.parse(resp.body)
+    local jstatus, jout = json.parse(resp.body)
     return jstatus and jout.username == user and jout.token
   end
 })
@@ -8534,7 +8534,7 @@ table.insert(fingerprints, {
                                  url.absolute(path, "home/login"),
                                  {header=header}, json.generate(jin))
     if not (resp.status == 200 and resp.body) then return false end
-    jstatus, jout = json.parse(resp.body)
+    local jstatus, jout = json.parse(resp.body)
     return jstatus and jout.data and jout.data.ret
   end
 })
@@ -10076,8 +10076,8 @@ table.insert(fingerprints, {
     local resp1 = http_get_simple(host, port, url.absolute(path, "cgi/challenge"))
     if resp1.status ~= 200 then return false end
     local url2 = ("cgi/login?user=%s&hash=%s"):format(user, pass)
-    resp2 = http_get_simple(host, port, url.absolute(path, url2),
-                           {cookies=resp1.cookies})
+    local resp2 = http_get_simple(host, port, url.absolute(path, url2),
+                                 {cookies=resp1.cookies})
     return resp2.status == 200
            and (resp2.body or ""):find("<RMCLOGIN><RC>0x0</RC></RMCLOGIN>", 1, true)
   end
