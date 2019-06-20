@@ -4,6 +4,19 @@
 ## TL;DR
 [NNdefaccts](https://github.com/nnposter/nndefaccts/) is nnposter's alternate fingerprint dataset for Nmap script http-default-accounts.
 
+## Synopsis
+```
+$ nmap --script http-default-accounts -p 80 192.168.1.1
+...
+PORT   STATE SERVICE
+80/tcp open  http
+| http-default-accounts:
+|   [Cacti] at /
+|     admin:admin
+|   [Nagios] at /nagios/
+|_    nagiosadmin:CactiEZ
+```
+
 ## Overview
 One of [Nmap](https://nmap.org/) scripts, [http-default-accounts](https://nmap.org/nsedoc/scripts/http-default-accounts.html), can be used to test a web target for presence of default credentials specific to various platforms, applications, and management interfaces. The script relies on a fingerprint dataset for correctly identifying the target and performing a login sequence.
 
