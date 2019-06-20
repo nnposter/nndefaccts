@@ -2598,11 +2598,6 @@ table.insert(fingerprints, {
     {username = "admin", password = "password"}
   },
   login_check = function (host, port, path, user, pass)
-    local form = {redirect="",
-                  self="",
-                  user=user,
-                  password=pass,
-                  gonder="OK"}
     local resp = http_post_simple(host, port, url.absolute(path, "check.php"),
                                  nil, {username=user,password=pass})
     return resp.status == 200
@@ -7351,7 +7346,6 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    local loc = response.header["location"] or ""
     return response.status == 302
            and (response.header["location"] or ""):find("?wicket:bookmarkablePage=:com.videoiq.fusion.camerawebapi.ui.pages.LoginPage", 1, true)
   end,
