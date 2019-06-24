@@ -8131,13 +8131,20 @@ table.insert(fingerprints, {
     {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
-    local form = {curckidx=0,
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local idx = get_tag(resp1.body, "input", {name="^hmckidx$", value="^%d$"})
+    if not idx then return false end
+    idx = idx.value
+    local form = {curckidx=idx,
                   loginun=user,
                   loginpw=pass}
-    local resp = http_post_simple(host, port, url.absolute(path, "main.htm"),
-                                 nil, form)
-    return resp.status == 200
-           and (resp.body or ""):lower():find("<input%f[%s][^>]-%sname%s*=%s*(['\"]?)hmcookies%1%f[%s][^>]-%svalue%s*=%s*(['\"]?)1%d+%2[%s>]")
+    local resp2 = http_post_simple(host, port, url.absolute(path, "main.htm"),
+                                  {cookies="hmcookie="..idx}, form)
+    if not (resp2.status == 200 and resp2.body) then return false end
+    local hmcookies = get_tag(resp2.body, "input", {name="^hmcookies$", value="^%d+$"})
+    return hmcookies
+           and hmcookies.value:sub(idx + 1, idx + 1) == "1"
   end
 })
 
