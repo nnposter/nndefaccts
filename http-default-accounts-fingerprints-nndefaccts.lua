@@ -6370,6 +6370,29 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Planet IP Surveillance",
+  category = "security",
+  paths = {
+    {path = "/"},
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("ipcam_language", 1, true)
+           and get_tag(response.body, "frame", {src="^asp/view%.asp$"})
+           and response.body:lower():find("<title>planet ip surveillance web management</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = ""},
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "asp/set.asp"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "TP-Link IPC",
   category = "security",
   paths = {
