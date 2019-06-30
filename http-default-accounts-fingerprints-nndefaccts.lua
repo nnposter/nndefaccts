@@ -208,7 +208,7 @@ local function try_http_auth (host, port, path, user, pass, digest)
   if digest == "any" then
     local resp = http_get_simple(host, port, path)
     local auth = (resp.header["www-authenticate"] or ""):lower():match("^%w+")
-    if not auth then return nil end
+    if not auth then return end
     digest = auth == "digest"
   end
   local creds = {username = user, password = pass, digest = digest}
@@ -224,6 +224,7 @@ end
 ---
 local function http_auth_realm (response)
   local auth = response.header["www-authenticate"] or ""
+  -- NB: "OEM Netcam" devices lack the closing double quote
   return auth:match('%srealm%s*=%s*"([^"]*)')
 end
 
