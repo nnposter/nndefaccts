@@ -3476,6 +3476,36 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "PLANET Smart Gigabit Switch",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">Welcome to PLANET ", 1, true)
+           and get_tag(response.body, "form", {action="/pass$"})
+  end,
+  login_combos = {
+    {username = "", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {password=pass,
+                  x=0,
+                  y=0}
+    local resp = http_post_simple(host, port, url.absolute(path, "pass"),
+                                 nil, form)
+    if not (resp.status == 200
+           and get_tag(resp.body or "", "frame", {src="/planet%.htm$"})) then
+      return false
+    end
+    http_get_simple(host, port, url.absolute(path, "logout?submit=Apply"))
+    return true
+  end
+})
+
+table.insert(fingerprints, {
   name = "ZyXEL Prestige",
   category = "routers",
   paths = {
