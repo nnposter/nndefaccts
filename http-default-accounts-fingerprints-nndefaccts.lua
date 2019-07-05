@@ -3506,6 +3506,87 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "PLANET Managed Switch (var.1)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local server = response.header["server"] or ""
+    return (http_auth_realm(response) or ""):find("^Loging?$")
+           and (server == "Vitesse Web Server"
+             or server == "WebServer")
+           and response.body
+           and response.body:find(">Authorization required to access this URL.<", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "PLANET Managed Switch (var.2)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302
+           and loc:find("/default%.html$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("1366X768", 1, true)
+           and resp.body:lower():find("<title>switch web management (1366x768 is recommended)</title>", 1, true)
+           and get_tag(resp.body, "form", {action="/goform/WebSetting%.html$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {name=user,
+                  pwd=pass,
+                  app="login"}
+    local resp = http_post_simple(host, port,
+                                  url.absolute(path, "goform/WebSetting.html"),
+                                  nil, form)
+    stdnse.debug1("status=%q",resp.status)
+    return resp.status == 203
+           and resp.body
+           and get_tag(resp.body, "frame", {src="/frontboard%.html$"})
+  end
+})
+
+table.insert(fingerprints, {
+  name = "PLANET Managed Switch (var.3)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/cgi-bin/get.cgi?cmd=portlink&lg=", 1, true)
+           and get_tag(response.body, "frame", {src="/cgi%-bin/get%.cgi%?cmd=portlink&lg=%w+$"})
+           and response.body:lower():find("<title>managed switch</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port,
+                        url.absolute(path, "cgi-bin/get.cgi?cmd=portlink&lg=en"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "ZyXEL Prestige",
   category = "routers",
   paths = {
