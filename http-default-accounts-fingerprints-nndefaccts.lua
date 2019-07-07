@@ -3556,7 +3556,6 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port,
                                   url.absolute(path, "goform/WebSetting.html"),
                                   nil, form)
-    stdnse.debug1("status=%q",resp.status)
     return resp.status == 203
            and resp.body
            and get_tag(resp.body, "frame", {src="/frontboard%.html$"})
