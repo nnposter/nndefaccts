@@ -849,8 +849,8 @@ table.insert(fingerprints, {
     {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
-    local header = {["Accept"] = "application/json, text/plain, */*",
-                    ["Content-Type"] = "application/json;charset=utf-8"}
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json;charset=utf-8"}
     local jin = {user=user, email="", password=pass}
     json.make_object(jin)
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
@@ -1830,8 +1830,8 @@ table.insert(fingerprints, {
     {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
-    local header = {["Accept"] = "application/json, text/plain, */*",
-                    ["Content-Type"] = "application/json"}
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json"}
     local jin = {username=user, password=pass}
     json.make_object(jin)
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
@@ -4703,7 +4703,7 @@ table.insert(fingerprints, {
     {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
-    local header = {["Content-Type"] = "application/json;charset=utf-8"}
+    local header = {["Content-Type"]="application/json;charset=utf-8"}
     local jin = {username=user, password=pass, needsToken=true}
     json.make_object(jin)
     local resp = http_post_simple(host, port,
@@ -6529,8 +6529,8 @@ table.insert(fingerprints, {
     for i = 1, pwdlen do
       table.insert(pwd, pad:byte(1 + (a[i] ~ b[i]) % #pad))
     end
-    local header = {["Accept"] = "application/json, text/plain, */*",
-                    ["Content-Type"] = "application/json;charset=utf-8"}
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json;charset=utf-8"}
     local jin = {method="do",
                  login={username=user,
                         password=string.char(table.unpack(pwd))}}
@@ -8676,7 +8676,7 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local usrlvl = {User=0,Installer=1}
-    local header = {["Content-Type"] = "application/json;charset=utf-8"}
+    local header = {["Content-Type"]="application/json;charset=utf-8"}
     local jin = {password=pass,
                  msg="",
                  userLevel=usrlvl[user],
@@ -9535,8 +9535,8 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local creds = stdnse.tohex(openssl.md5(user .. "_" .. pass))
-    local header = {["Content-Type"] = "application/x-www-form-urlencoded",
-                    ["datatype"] = "json"}
+    local header = {["Content-Type"]="application/x-www-form-urlencoded",
+                    ["datatype"]="json"}
     local resp = http_post_simple(host, port, url.absolute(path, "api/"),
                                  {header=header}, "/api/login/" .. creds)
     return resp.status == 200
@@ -9570,8 +9570,8 @@ table.insert(fingerprints, {
       local jstatus, jout = json.parse(resp.body)
       return jstatus and jout.isAdminPasswordSet == false
     end
-    local header = {["Accept"] = "application/json, text/plain, */*",
-                    ["Content-Type"] = "application/json;charset=utf-8"}
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json;charset=utf-8"}
     local jin = {username=user,
                  password=pass,
                  adminLogin=false,
@@ -9713,8 +9713,8 @@ table.insert(fingerprints, {
     {username = "admin", password = "openmediavault"}
   },
   login_check = function (host, port, path, user, pass)
-    local header = {["Accept"] = "application/json, */*",
-                    ["Content-Type"] = "application/json"}
+    local header = {["Accept"]="application/json, */*",
+                    ["Content-Type"]="application/json"}
     local jin = {service="Session",
                  method="login",
                  params={username=user,password=pass},
@@ -9775,8 +9775,8 @@ table.insert(fingerprints, {
     {username = "administrator", password = "St0r@ge!"}
   },
   login_check = function (host, port, path, user, pass)
-    local header = {["Accept"] = "application/json, text/plain, */*",
-                    ["Content-Type"] = "application/json;charset=utf-8"}
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json;charset=utf-8"}
     local jin = {jsonrpc="2.0",
                  method="Logon",
                  params={UserName=user,Password=pass},
@@ -9843,7 +9843,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "index.php/mv_login/validate_user"),
-                                 {header = {["Accept"] = "text/html, text/plain, */*"}},
+                                 {header={["Accept"]="text/html, text/plain, */*"}},
                                  {username=user,password=pass})
     return resp.status == 302
            and (resp.header["location"] or ""):find("/index.php/mv_home/admin_dashboard", 1, true)
