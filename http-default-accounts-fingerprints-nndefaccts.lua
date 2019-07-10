@@ -3586,6 +3586,42 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "PLANET Wireless Router",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("PLANET Technology", 1, true)
+           and response.body:find("(['\"])dataCenter%.js%1")
+           and response.body:find("%Wauth_action%s*:%s*(['\"])login%1")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "admin", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {username=user,
+                  password=base64.enc(pass:gsub("%s", "@")),
+                  getPage="index.html",
+                  action="Apply",
+                  auth_action="login",
+                  mode="AUTH",
+                  _flg=0}
+    local resp = http_post_simple(host, port,
+                                  url.absolute(path, "postCenter.js"),
+                                  nil, form)
+    if not (resp.status == 200 and resp.body) then return false end
+    local jstatus, jout = json.parse(resp.body:gsub("'", "\""))
+    if not (jstatus and jout.result == "0") then return false end
+    http_get_simple(host, port, url.absolute(path, "login.html"))
+    return true
+  end
+})
+
+table.insert(fingerprints, {
   name = "ZyXEL Prestige",
   category = "routers",
   paths = {
