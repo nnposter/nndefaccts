@@ -253,7 +253,7 @@ end
 ---
 local function parse_tag (html)
   local attrs = {}
-  local _, pos = html:find("^<%w+%W")
+  local _, pos = html:find("^<%f[%w][%w-]+[^%w-]")
   while true do
     local attr, equal
     _, pos, attr, equal = html:find("%f[%w]([%w-]+)%s*(=?)%s*", pos)
@@ -294,7 +294,7 @@ local function find_tag (html, elem, criteria, init)
   for cnam, cptn in pairs(criteria or {}) do
     icrit[cnam:lower()] = stringaux.ipattern(cptn)
   end
-  local tptn = stringaux.ipattern("<" .. elem .. "%f[%s/>].->")
+  local tptn = stringaux.ipattern("<" .. elem:gsub("%-", "%%-") .. "%f[%s/>].->")
   local start
   local stop = init
   while true do
@@ -366,7 +366,7 @@ local function get_tag_html (html, elem, criteria, init)
   local _, start, attrs = find_tag(html, elem, criteria, init)
   if not start then return end
   start = start + 1
-  local stop = html:find(stringaux.ipattern("</" .. elem .. "[%s>]"), start)
+  local stop = html:find(stringaux.ipattern("</" .. elem:gsub("%-", "%%-") .. "[%s>]"), start)
   return stop and html:sub(start, stop - 1) or nil
 end
 
