@@ -7165,6 +7165,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Samsung iPOLiS",
+  cpe = "cpe:/a:samsung:ipolis_device_manager",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and response.body
+           and response.body:find("home/monitoring.cgi", 1, true)
+           and response.body:find("%Wdocument%.location%.replace%((['\"])[^'\"]-%f[^/'\"]home/monitoring%.cgi%1%)%s*;")) then
+      return false
+    end
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, "home/monitoring.cgi"))
+    return (http_auth_realm(resp) or ""):find("^iPolis%f[_\0]")
+  end,
+  login_combos = {
+    {username = "admin", password = "4321"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "home/monitoring.cgi"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Truen TCAM (var.1)",
   category = "security",
   paths = {
