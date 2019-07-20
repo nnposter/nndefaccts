@@ -590,7 +590,7 @@ table.insert(fingerprints, {
     local resp2 = http_post_simple(host, port, path,
                                   {cookies=resp1.cookies, header=header}, form)
     return resp2.status == 302
-           and (resp2.header["location"] or ""):find("/extrahop/$")
+           and (resp2.header["location"] or ""):sub(-#path) == path
   end
 })
 
@@ -832,7 +832,7 @@ table.insert(fingerprints, {
     local resp2 = http_post_simple(host, port, lurl,
                                   {cookies=resp1.cookies, header=header}, form)
     return resp2.status == 302
-           and (resp2.header["location"] or ""):find(path, 1, true)
+           and (resp2.header["location"] or ""):sub(-#path) == path
   end
 })
 
