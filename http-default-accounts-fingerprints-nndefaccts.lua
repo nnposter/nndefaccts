@@ -7274,6 +7274,72 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ubiquiti UniFi Video (var.1)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">UniFi Video<", 1, true)
+           and response.body:lower():find("<title>unifi video</title>", 1, true)
+           and get_tag(response.body, "main-view", {["ui-view"]=""})
+           and get_tag(response.body, "script", {["data-headjs-load"]="^main%.js%f[\0?]"})
+  end,
+  login_combos = {
+    {username = "ubnt", password = "ubnt"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=url.absolute(path, "login")})),
+                    ["Content-Type"]="application/json",
+                    ["Accept"]="application/json, text/plain, */*"}
+    local jin = {username=user, password=pass}
+    json.make_object(jin)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "api/1.1/login"),
+                                 {cookies="ubntActiveUser=false", header=header},
+                                 json.generate(jin))
+    return resp.status == 200
+           and get_cookie(resp, "authId", "^%w+$")
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Ubiquiti UniFi Video (var.2)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">UniFi Video<", 1, true)
+           and response.body:find("app-id=com.ubnt.unifivideo", 1, true)
+           and response.body:lower():find("<title>unifi video</title>", 1, true)
+           and get_tag(response.body, "meta", {name="^google%-play%-app$", content="^app%-id=com%.ubnt%.unifivideo$"})
+  end,
+  login_combos = {
+    {username = "ubnt", password = "ubnt"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if resp1.status ~= 200 then return false end
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=url.absolute(path, "login")})),
+                    ["Content-Type"]="application/json",
+                    ["Accept"]="application/json, text/plain, */*"}
+    local jin = {username=user, password=pass}
+    json.make_object(jin)
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "api/2.0/login"),
+                                  {cookies=resp1.cookies, header=header},
+                                  json.generate(jin))
+    return resp2.status == 200
+           and get_cookie(resp2, "JSESSIONID_AV", "^%x+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Xiongmai NETSurveillance",
   category = "security",
   paths = {
