@@ -1957,7 +1957,7 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     local realm = http_auth_realm(response) or ""
-    return realm:find("^Linksys %u[%u%d]+$")
+    return realm:find("^Linksys %u[%u%d]+%s*$")
            or realm:find("^WRT54GC%w*$")
            or realm == "NR041"
   end,
