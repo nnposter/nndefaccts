@@ -4974,8 +4974,9 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 200
            and response.body
+           and response.body:find("Grandstream", 1, true)
            and response.body:lower():find("<title>grandstream ?device configuration</title>")
-           and response.body:lower():find("%sname%s*=%s*(['\"]?)gnkey%1%f[%s][^>]-%stype%s*=%s*(['\"]?)hidden%2%f[%s][^>]-%svalue%s*=%s*(['\"]?)0b82%3[%s>]")
+           and get_tag(response.body, "input", {name="^gnkey$", type="^hidden$", value="^0b82$"})
   end,
   login_combos = {
     {username = "", password = "admin"},
