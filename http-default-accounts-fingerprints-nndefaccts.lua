@@ -480,6 +480,43 @@ fingerprints = {}
 --WEB
 ---
 table.insert(fingerprints, {
+  name = "Ansible AWX",
+  cpe = "cpe:/a:ansible:tower",
+  category = "web",
+  paths = {
+    {path = "/api/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and get_cookie(response, "csrftoken", "^%w+$")
+           and response.body
+           and response.body:find("AWX REST API", 1, true)) then
+      return false
+    end
+    local jstatus, jout = json.parse(response.body)
+    return jstatus and jout.description == "AWX REST API"
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if resp1.status ~= 200 then return false end
+    local token = get_cookie(resp1, "csrftoken")
+    if not token then return false end
+    local form = {username=user,
+                  password=pass,
+                  next=path}
+    local header = {["X-CSRFToken"]=token}
+    local resp2 = http_post_simple(host, port, url.absolute(path, "login/"),
+                                  {cookies=resp1.cookies, header=header}, form)
+    return resp2.status == 302
+           and resp2.header["location"] == path
+           and get_cookie(resp2, "userLoggedIn") == "true"
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cacti",
   cpe = "cpe:/a:cacti:cacti",
   category = "web",
