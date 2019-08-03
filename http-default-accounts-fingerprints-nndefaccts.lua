@@ -1930,6 +1930,50 @@ table.insert(fingerprints, {
   end
 })
 
+table.insert(fingerprints, {
+  name = "Hippo CMS",
+  category = "web",
+  paths = {
+    {path = "/"},
+    {path = "/cms/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("hippo-login", 1, true)
+           and get_tag(response.body, "input", {name="^id2_hf_0$"})
+  end,
+  login_combos = {
+    {username = "admin",  password = "admin"},
+    {username = "editor", password = "editor"},
+    {username = "author", password = "author"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl;
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local submit = get_tag(resp1.body, "input", {name="^:submit$", onclick=""})
+    if submit then
+      local qry = submit.onclick:match("=%s*wicketSubmitFormById%(['\"]id%d+['\"],%s*['\"](.-)['\"]")
+      if not qry then return false end
+      lurl = xmldecode(qry) .. "&random=" .. math.random()
+    else
+      local frm = get_tag(resp1.body, "form", {name="^signInForm$", action=""})
+      if not frm then return false end
+      lurl = frm.action
+    end
+    local form = {id2_hf_0="",
+                  username=user,
+                  password=pass,
+                  locale="en",
+                  [":submit"]="log in"}
+    local resp2 = http_post_simple(host, port, url.absolute(path, lurl),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 302
+           and (resp2.header["location"] or ""):sub(-#path) == path
+  end
+})
+
 ---
 --ROUTERS
 ---
