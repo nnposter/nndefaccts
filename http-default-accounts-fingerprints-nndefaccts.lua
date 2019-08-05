@@ -987,7 +987,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("OrientDB", 1, true)
-           and get_tag(response.body, "meta", {content="^orientdb studio$"})
+           and get_tag(response.body, "meta", {content="^OrientDB Studio$"})
            and get_refresh_url(response.body, "/studio/index%.html$")
   end,
   login_combos = {
