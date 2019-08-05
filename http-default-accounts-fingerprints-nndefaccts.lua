@@ -6825,7 +6825,8 @@ table.insert(fingerprints, {
            and (realm == "MegapixelIPCamera" or realm == "QuasarHDIPCamera")
   end,
   login_combos = {
-    {username = "Admin", password = "1234"}
+    {username = "Admin", password = "1234"},
+    {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
