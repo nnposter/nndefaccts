@@ -6586,6 +6586,27 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "OEM Boa IP Camera (var.3)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and (response.header["server"] or ""):find("^Boa/%d+%.")
+           and get_tag(response.body, "script", {src="^profile$"})
+           and response.body:lower():find("<title>ip camera viewer</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "12345"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "setting.htm"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "OEM Netcam",
   category = "security",
   paths = {
