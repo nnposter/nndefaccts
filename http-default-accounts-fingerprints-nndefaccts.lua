@@ -7784,15 +7784,19 @@ table.insert(fingerprints, {
            and response.status == 200
            and response.body
            and (response.body:find("js/loginEx.js", 1, true)
-               and get_tag(response.body, "script", {src="^js/loginex%.js[?\0]"})
-               and get_tag(response.body, "script", {src="^jscore/rpccore%.js[?\0]"})
+               and get_tag(response.body, "script", {src="^js/loginEx%.js%f[?\0]"})
+               and get_tag(response.body, "script", {src="^jsCore/rpcCore%.js%f[?\0]"})
              or response.body:find("/js/merge.js", 1, true)
                and get_tag(response.body, "script", {src="/js/merge%.js$"})
-               and get_tag(response.body, "div", {id="^download_plugins$"}))
+               and get_tag(response.body, "div", {id="^download_plugins$"})
+             or response.body:find("jsBase/widget/js/dui.tab.js", 1, true)
+               and get_tag(response.body, "script", {src="^jsBase/widget/js/dui%.tab%.js%f[?\0]"})
+               and get_tag(response.body, "script", {src="^jsCore/common%.js%f[?\0]"}))
   end,
   login_combos = {
-    {username = "666666", password = "666666"},
-    {username = "admin",  password = "admin"}
+    {username = "666666",    password = "666666"},
+    {username = "admin",     password = "admin"},
+    {username = "anonymity", password = "anonymity"}
   },
   login_check = function (host, port, path, user, pass)
     local lurl = url.absolute(path, "RPC2_Login")
