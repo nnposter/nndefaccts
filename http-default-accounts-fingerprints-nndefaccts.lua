@@ -6826,7 +6826,7 @@ end,
 })
 
 table.insert(fingerprints, {
-  name = "Alphafinity Camera",
+  name = "Milesight Camera (Alphafinity)",
   category = "security",
   paths = {
     {path = "/"}
