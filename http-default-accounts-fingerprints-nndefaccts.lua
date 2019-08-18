@@ -6855,6 +6855,37 @@ end,
 })
 
 table.insert(fingerprints, {
+  name = "Milesight Camera (Beward)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 200
+           and response.body
+           and (response.body:find(">BEWARD Network HD camera", 1, true)
+             or response.body:find(">Beward Network Camera", 1, true))
+           and get_tag(response.body, "input", {id="^secret$"})
+           and get_tag(response.body, "script", {src="/javascript/md5%.js%?"})
+end,
+  login_combos = {
+    {username = "admin",    password = "admin"},
+    {username = "testuser", password = "htyjdfwbz1"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local userno = {admin=0, testuser=1}
+    local creds = {tostring(userno[user]),
+                   url.escape(user),
+                   stdnse.tohex(openssl.md5(pass))}
+    local lurl = "vb.htm?language=ie&checkpassword=" .. table.concat(creds, ":")
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and resp.body:find("OK checkpassword", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "OEM MegapixelIPCamera",
   category = "security",
   paths = {
