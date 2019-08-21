@@ -6886,6 +6886,24 @@ end,
 })
 
 table.insert(fingerprints, {
+  name = "Beward SIP Door Station",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 401
+           and (http_auth_realm(response) or ""):find(" SIP Door Station %- %x+$")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "OEM MegapixelIPCamera",
   category = "security",
   paths = {
