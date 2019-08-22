@@ -7198,6 +7198,36 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Foscam IP Camera",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("IPCam", 1, true)
+           and response.body:lower():find("<title>ipcam client</title>", 1, true)
+           and response.body:lower():find("%ssrc%s*=%s*['\"]js/main%.js['\"?]")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "admin", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {usr=user,
+                  pwd=pass,
+                  cmd="logIn",
+                  usrName=user,
+                  groupId=string.sub(math.floor(stdnse.clock_ms()), -9)}
+    local lurl = "cgi-bin/CGIProxy.fcgi?" .. url.build_query(form)
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and (resp.body or ""):find("<logInResult>0</logInResult>", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "ITX Web Remote Viewer",
   category = "security",
   paths = {
