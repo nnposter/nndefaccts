@@ -8198,7 +8198,6 @@ table.insert(fingerprints, {
   },
   target_check = function (host, port, path, response)
     return http_auth_realm(response) == "Private"
-           and (response.header["server"] or ""):find("^lighttpd/%d+%.")
   end,
   login_combos = {
     {username = "admin", password = "password"}
