@@ -9335,6 +9335,66 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Samsung SyncThru (var.1)",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("SyncThru", 1, true)
+           and response.body:lower():find("<title>syncthru web service</title>", 1, true)
+           and get_tag(response.body, "frame", {src="^top_frame%.html$"})
+  end,
+  login_combos = {
+    {username = "", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, "Maintenance/security.htm"))
+    return resp.status == 200
+           and (resp.body or ""):find("%Wvar%s+secEnabled%s*=%s*(['\"])%1%s*;")
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Samsung SyncThru (var.2)",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("SyncThru", 1, true)
+           and response.body:lower():find("<title>syncthru web service</title>", 1, true)
+           and get_tag(response.body, "frame", {src="^first_top_frame%.html$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "1111"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {j_username=base64.enc(user),
+                  j_password=base64.enc(pass),
+                  j_domain=base64.enc("LOCAL"),
+                  context=url.absolute(path, "sws.login"),
+                  j_targetAuthSuccess=url.absolute(path, "sws.login/gnb/loggedinView.sws?loginBG=login_bg.gif&basedURL=/&sws=N&isPinCode=false"),
+                  IDUserId=user,
+                  IDUserPw=pass,
+                  IDDomain="LOCAL",
+                  isPinCode="true",
+                  isIdOnly="true"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "sws.application/j_spring_security_check_pre_installed"),
+                                 nil, form)
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/loggedinView%.sws%f[;?\0]")
+           and get_cookie(resp, "UserRole") == "Admin"
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sharp Printer",
   category = "printer",
   paths = {
