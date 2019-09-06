@@ -3234,6 +3234,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Yamaha RT 10.x",
+  cpe = "cpe:/o:yahama:rt*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = response.status == 200
+                 and get_refresh_url(response.body or "", "/user/index[_%a]*.html$")
+    if not lurl then return false end
+    local resp = http_get_simple(host, port, lurl)
+    return (http_auth_realm(resp) or ""):find("^YAMAHA%-RT ")
+  end,
+  login_combos = {
+    {username = "", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_get_simple(host, port, path)
+    local lurl = resp.status == 200
+                 and get_refresh_url(resp.body or "", "/user/index[_%a]*.html$")
+    if not lurl then return false end
+    return try_http_auth(host, port, lurl, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Zoom ADSL X5",
   category = "routers",
   paths = {
