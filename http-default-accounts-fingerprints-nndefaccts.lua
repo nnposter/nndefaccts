@@ -3260,6 +3260,24 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Yamaha RT 11.x",
+  cpe = "cpe:/o:yahama:rt*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return (http_auth_realm(response) or ""):find("^YAMAHA%-RT ")
+  end,
+  login_combos = {
+    {username = "", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Zoom ADSL X5",
   category = "routers",
   paths = {
