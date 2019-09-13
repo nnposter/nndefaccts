@@ -3278,6 +3278,35 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Yamaha SWX",
+  category = "routers",
+  paths = {
+    {path = "/login.html"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Yamaha Corporation", 1, true)
+           and get_tag(response.body, "form", {action="/goform/authenticate%.json$"})
+           and get_tag(response.body, "input", {name="^URL$", value="/dashboard/index%.html$"})
+  end,
+  login_combos = {
+    {username="", password=""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {URL=url.absolute(path, "/dashboard/index.html"),
+                  USER=user,
+                  PASS=pass}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "goform/authenticate.json"),
+                                 nil, form)
+    if not (resp.status == 200 and resp.body) then return false end
+    local jstatus, jout = json.parse(resp.body)
+    return jstatus and jout.result == "SUCCESS"
+  end
+})
+
+table.insert(fingerprints, {
   name = "Zoom ADSL X5",
   category = "routers",
   paths = {
