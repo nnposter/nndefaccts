@@ -3776,6 +3776,36 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Rubytech chassis",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("fake_server.html", 1, true)
+           and get_tag(response.body, "form", {action="^fake_server%.html$"})
+           and get_tag(response.body, "input", {name="^textpass$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = stdnse.output_table()
+    form.textuser=user
+    form.textpass=pass
+    form.Submit="Login"
+    form.randstr=math.random()
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "fake_server.html"),
+                                 nil, form)
+    return resp.status == 200
+           and (resp.body or ""):find("%Wlocation%.href%s*=%s*['\"][^'\"]-/main_frame%.html%?")
+  end
+})
+
+table.insert(fingerprints, {
   name = "ZyXEL Prestige",
   category = "routers",
   paths = {
