@@ -2110,7 +2110,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Cisco Configuration Utility",
+  name = "Cisco Configuration Utility (var.1)",
   category = "routers",
   paths = {
     {path = "/"}
@@ -2142,8 +2142,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Cisco RV Firewall",
-  cpe = "cpe:/o:cisco:rv*",
+  name = "Cisco Configuration Utility (var.2)",
   category = "routers",
   paths = {
     {path = "/"}
