@@ -1224,12 +1224,14 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Apache Tomcat",
+  name = "Apache Tomcat Manager",
   cpe = "cpe:/a:apache:tomcat",
   category = "web",
   paths = {
     {path = "/manager/html/"},
+    {path = "/manager/status/"},
     {path = "/tomcat/manager/html/"},
+    {path = "/tomcat/manager/status/"},
     {path = "/cognos_express/manager/html/"}
   },
   target_check = function (host, port, path, response)
@@ -1247,8 +1249,43 @@ table.insert(fingerprints, {
     {username = "xampp", password = "xampp"},
     {username = "QCC", password = "QLogic66"},
     {username = "fhir", password = "FHIRDefaultPassword"},
+    {username = "username", password = "password"},
+    {username = "username1", password = "password"},
     {username = "pippo", password = "paperino"},
     {username = "topolino", password = "minnie"},
+    {username = "root", password = "vagrant"},
+    {username = "tomcat", password = "s3cret"},
+    {username = "root", password = "owaspbwa"},
+    {username = "admin", password = "owaspbwa"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Apache Tomcat Host Manager",
+  cpe = "cpe:/a:apache:tomcat",
+  category = "web",
+  paths = {
+    {path = "/host-manager/html/"},
+    {path = "/host-manager/text/"},
+    {path = "/tomcat/host-manager/html/"},
+    {path = "/tomcat/host-manager/text/"}
+  },
+  target_check = function (host, port, path, response)
+    return http_auth_realm(response) == "Tomcat Host Manager Application"
+  end,
+  login_combos = {
+    {username = "tomcat", password = "tomcat"},
+    {username = "admin", password = "admin"},
+    {username = "admin", password = ""},
+    {username = "ADMIN", password = "ADMIN"},
+    {username = "xampp", password = "xampp"},
+    {username = "QCC", password = "QLogic66"},
+    {username = "fhir", password = "FHIRDefaultPassword"},
+    {username = "username", password = "password"},
+    {username = "pippo", password = "paperino"},
     {username = "root", password = "vagrant"},
     {username = "tomcat", password = "s3cret"},
     {username = "root", password = "owaspbwa"},
