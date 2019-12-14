@@ -2215,6 +2215,46 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Cisco Router Access",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find("%Wvar%s+nonce%s*=%s*(['\"])%x+%1")
+           and response.body:find("%Wfunction%s+en_value%s*%(")
+           and get_tag(response.body, "input", {name="^gui_action$"})
+  end,
+  login_combos = {
+    {username = "", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local nonce = resp1.body:match("%Wvar%s+nonce%s*=%s*['\"](%x+)['\"]")
+    if not nonce then return false end
+    pass = ("%s%02d"):format(pass, #pass)
+    pass = pass:rep(math.ceil(64 / #pass)):sub(1, 64)
+    pass = stdnse.tohex(openssl.md5(pass))
+    local wait_time = get_tag(resp1.body, "input", {name="^wait_time$"})
+    local form = {submit_button="login",
+                  change_action="",
+                  gui_action="Apply",
+                  wait_time=wait_time and wait_time.value or "",
+                  submit_type="",
+                  http_username=user,
+                  http_passwd=stdnse.tohex(openssl.md5(pass .. nonce))}
+    local resp2 = http_post_simple(host, port, url.absolute(path, "login.cgi"),
+                                  nil, form)
+    return resp2.status == 200
+           and (resp2.body or ""):find(";session_id=%x+%W")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cisco IronPort",
   category = "routers",
   paths = {
