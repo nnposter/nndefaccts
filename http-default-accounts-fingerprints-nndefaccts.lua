@@ -4787,6 +4787,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Pakedge C36 Macrocell Controller",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 302
+           and response.header["location"] == "./c36/login.php"
+  end,
+  login_combos = {
+    {username = "pakedge", password = "pakedgec"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {rtype="login",
+                  username=user,
+                  password=pass}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "c36/ajax/login.php"),
+                                 nil, form)
+    if not (resp.status == 200 and resp.body) then return false end
+    local jstatus, jout = json.parse(resp.body)
+    return jstatus and jout.ok
+  end
+})
+
+table.insert(fingerprints, {
   name = "ArubaOS WebUI",
   cpe = "cpe:/o:arubanetworks:arubaos",
   category = "routers",
