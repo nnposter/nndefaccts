@@ -4515,6 +4515,31 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ubiquiti EdgeOS",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">EdgeOS<", 1, true)
+           and response.body:find("%WEDGE%.Config%s*=")
+           and response.body:lower():find("<title>edgeos</title>")
+  end,
+  login_combos = {
+    {username = "ubnt", password = "ubnt"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port, path, nil,
+                                 {username=user,password=pass})
+    return (resp.status == 302 or resp.status == 303)
+           and (resp.header["location"] or ""):sub(-#path) == path
+           and get_cookie(resp, "PHPSESSID", "^%w+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "NetComm ADSL router",
   category = "routers",
   paths = {
