@@ -4540,6 +4540,36 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ubiquiti EdgeSwitch",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(">Ubiquiti EdgeSwitch<", 1, true)
+           and response.body:lower():find("<title>ubiquiti edgeswitch</title>")
+           and get_tag(response.body, "script", {src="/static/scripts/bundle%-%x+%.js$"})
+  end,
+  login_combos = {
+    {username = "ubnt", password = "ubnt"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=path})),
+                    ["Content-Type"]="application/json",
+                    ["Accept"]="application/json, text/plain, */*"}
+    local jin = {username=user, password=pass}
+    json.make_object(jin)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "api/v1.0/user/login"),
+                                 {header=header}, json.generate(jin))
+    return resp.status == 200
+           and (resp.header["x-auth-token"] or ""):find("^%x+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "NetComm ADSL router",
   category = "routers",
   paths = {
