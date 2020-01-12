@@ -5628,6 +5628,29 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Mediatrix",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 302
+           and (response.header["location"] or ""):find("%f[^/\0]system_info%.esp$")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "admin", password = "administrator"},
+    {username = "public", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port, url.absolute(path, "login.esp"),
+                                 nil, {username=user,passwd=pass})
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("%f[^/\0]system_info%.esp$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Openstage IP Phone",
   category = "voip",
   paths = {
