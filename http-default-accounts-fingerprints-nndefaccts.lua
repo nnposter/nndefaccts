@@ -5651,6 +5651,26 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Mediatrix (basic auth)",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response)
+    return (realm == "Mediatrix" or realm == "default")
+           and (response.body or ""):lower():find("<title>authentication error: access denied, authorization required.</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "1234"},
+    {username = "root", password = "5678"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Openstage IP Phone",
   category = "voip",
   paths = {
