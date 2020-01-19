@@ -5671,6 +5671,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Mediatrix iPBX",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("PBX Administration", 1, true)
+           and get_tag(response.body, "a", {href="^admin/$"})
+           and response.body:lower():find("<title>ipbx</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "admin/config.php"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Openstage IP Phone",
   category = "voip",
   paths = {
