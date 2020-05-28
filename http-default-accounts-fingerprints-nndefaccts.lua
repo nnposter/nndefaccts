@@ -1095,10 +1095,11 @@ table.insert(fingerprints, {
     local form = {j_username=user,
                   j_password=pass,
                   j_character_encoding="UTF-8"}
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=path}))}
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "j_security_check"),
-                                 nil, form)
-    if resp.status == 403 then return false end
+                                 {header=header}, form)
+    if not (resp.status >= 200 and resp.status <= 399) then return false end
     if resp.status == 302
        and (resp.header["location"] or ""):find("/console/login/LoginForm%.jsp$") then
       return false
