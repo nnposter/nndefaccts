@@ -1089,7 +1089,14 @@ table.insert(fingerprints, {
     {username = "weblogic", password = "weblogic1"},
     {username = "weblogic", password = "welcome1"},
     {username = "weblogic", password = "password"},
-    {username = "system", password = "Passw0rd"}
+    {username = "system",   password = "Passw0rd"},
+    {username = "system",   password = "password"},
+    {username = "operator", password = "Passw0rd"},
+    {username = "operator", password = "password"},
+    {username = "monitor",  password = "Passw0rd"},
+    {username = "monitor",  password = "password"},
+    {username = "oraclesystemuser", password = "Passw0rd"},
+    {username = "oraclesystemuser", password = "password"}
   },
   login_check = function (host, port, path, user, pass)
     local form = {j_username=user,
