@@ -16,7 +16,7 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
 You should have received a copy of the GNU General Public License along
-with this program.  If not, see <http://www.gnu.org/licenses/>.
+with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Note that NNdefaccts is licensed separately from Nmap.  By obtaining
 a custom license for Nmap you are not automatically entitled to modify or
