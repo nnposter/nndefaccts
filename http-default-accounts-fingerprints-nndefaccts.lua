@@ -2125,8 +2125,8 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Cisco EPC3925",
-  cpe = "cpe:/h:cisco:epc3925",
+  name = "Cisco EPC39xx",
+  cpe = "cpe:/h:cisco:epc39*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -2138,7 +2138,8 @@ table.insert(fingerprints, {
            and response.body:find("%Wwindow%.location%.href%s*=%s*(['\"])Docsis_system%.asp%1")
   end,
   login_combos = {
-    {username = "", password = ""}
+    {username = "",      password = ""},
+    {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
     local form = {username_login=user,
@@ -2149,8 +2150,9 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "goform/Docsis_system"),
                                  nil, form)
+    local loc = resp.header["location"] or ""
     return resp.status == 302
-           and (resp.header["location"] or ""):find("/Quick_setup%.asp$")
+           and (loc:find("/Quick_setup%.asp$") or loc:find("/Administration%.asp$"))
   end
 })
 
