@@ -11051,7 +11051,7 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    local idrac6 = response.status == 301
+    local idrac6 = (response.status == 301 or response.status == 302)
                    and (response.header["server"] or ""):find("^Mbedthis%-Appweb/%d+%.")
     local idrac7 = response.status == 302
                    and response.header["server"] == "Embedthis-http"
