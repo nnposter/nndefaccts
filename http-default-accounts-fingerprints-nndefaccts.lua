@@ -431,7 +431,7 @@ end
 -- @return A string with unsafe characters encoded
 ---
 local function xmlencode (s)
-  return s:gsub("%W", function (c) return ("&#x%x;"):format(c:byte()) end)
+  return (s:gsub("%W", function (c) return ("&#x%x;"):format(c:byte()) end))
 end
 
 ---
@@ -459,7 +459,7 @@ end
 -- @return A URL-encoded string
 ---
 local function urlencode_all (s)
-  return s:gsub(".", function (c) return ("%%%02x"):format(c:byte()) end)
+  return (s:gsub(".", function (c) return ("%%%02x"):format(c:byte()) end))
 end
 
 ---
