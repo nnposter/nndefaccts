@@ -11065,7 +11065,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "data/login"),
                                  nil, {user=user, password=pass})
     return resp.status == 200
-           and (resp.body or ""):find("<authResult>0</authResult>", 1, true)
+           and (resp.body or ""):find("<authResult>[0|5]</authResult>", 1, false)
   end
 })
 
