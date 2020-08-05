@@ -11059,7 +11059,7 @@ table.insert(fingerprints, {
     local resp = http_get_simple(host, port, loc)
     return resp.status == 200
            and resp.body
-           and resp.body:find("/login.html", 1, true)
+           and resp.body:find("login.html", 1, true)
            and resp.body:find("%Wvar%s+isSCenabled%s*=")
   end,
   login_combos = {
