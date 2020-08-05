@@ -22,14 +22,14 @@ Note that NNdefaccts is licensed separately from Nmap.  By obtaining
 a custom license for Nmap you are not automatically entitled to modify or
 distribute the NNdefaccts dataset to the same extent as Nmap itself and,
 conversely, licensing NNdefaccts does not cover Nmap.  For details, see
-<https://github.com/nnposter/nndefaccts/COPYING>.
+<https://github.com/nnposter/nndefaccts/blob/master/COPYING>.
 
 You can obtain the latest version of the dataset from its public repository
 at <https://github.com/nnposter/nndefaccts/>.
 
 To report bugs and other problems, contribute patches, request a feature,
 provide generic feedback, etc., please see instructions posted at
-<https://github.com/nnposter/nndefaccts/README.md>.
+<https://github.com/nnposter/nndefaccts/blob/master/README.md>.
 ]]
 
 
