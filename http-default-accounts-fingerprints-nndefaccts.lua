@@ -11051,12 +11051,16 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    local idrac6 = response.status == 301
-                   and (response.header["server"] or ""):find("^Mbedthis%-Appweb/%d+%.")
-    local idrac7 = response.status == 302
-                   and response.header["server"] == "Embedthis-http"
-    return (idrac6 or idrac7)
-           and (response.header["location"] or ""):find("/start%.html$")
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not ((response.status == 301 or response.status == 302)
+           and loc:find("/start%.html$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("/login.html", 1, true)
+           and resp.body:find("%Wvar%s+isSCenabled%s*=")
   end,
   login_combos = {
     {username = "root", password = "calvin"}
