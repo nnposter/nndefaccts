@@ -11044,8 +11044,8 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Dell iDRAC6/7 (Mbedthis)",
-  cpe = "cpe:/o:dell:idrac7_firmware",
+  name = "Dell iDRAC6/7/8 (Mbedthis)",
+  cpe = "cpe:/o:dell:idrac678_firmware",
   category = "console",
   paths = {
     {path = "/"}
@@ -11056,7 +11056,10 @@ table.insert(fingerprints, {
            and loc:find("/start%.html$")) then
       return false
     end
-    local resp = http_get_simple(host, port, loc)
+    
+    -- "Accept-Encoding: gzip" is required for iDRAC8 server to respond!
+    local header = {["Accept-Encoding"] = "gzip"}
+    local resp = http_get_simple(host, port, loc, {header=header})
     return resp.status == 200
            and resp.body
            and resp.body:find("/login.html", 1, true)
