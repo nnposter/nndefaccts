@@ -10984,8 +10984,11 @@ table.insert(fingerprints, {
     {username = "root", password = "calvin"}
   },
   login_check = function (host, port, path, user, pass)
+    local form = stdnse.output_table()
+    form.user = user
+    form.hash = pass
     local resp = http_post_simple(host, port, url.absolute(path, "cgi/login"),
-                                 nil, {user=user, hash=pass})
+                                 nil, form)
     return resp.status == 200
            and (resp.body or ""):find("%Wtop%.location%.replace%(%s*(['\"])[^'\"]-/cgi/main%1%s*%)")
   end
@@ -11008,9 +11011,12 @@ table.insert(fingerprints, {
     {username = "root", password = "calvin"}
   },
   login_check = function (host, port, path, user, pass)
+    local form = stdnse.output_table()
+    form.user = user
+    form.password = pass
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "cgi-bin/webcgi/login"),
-                                 nil, {user=user, password=pass})
+                                 nil, form)
     return resp.status == 302
            and (resp.header["location"] or ""):find("/cgi%-bin/webcgi/main$")
   end
@@ -11032,9 +11038,10 @@ table.insert(fingerprints, {
     {username = "root", password = "calvin"}
   },
   login_check = function (host, port, path, user, pass)
-    local form = {WEBVAR_PASSWORD=pass,
-                  WEBVAR_USERNAME=user,
-                  WEBVAR_ISCMCLOGIN=0}
+    local form = stdnse.output_table()
+    form.WEBVAR_PASSWORD = pass
+    form.WEBVAR_USERNAME = user
+    form.WEBVAR_ISCMCLOGIN = 0
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "Applications/dellUI/RPC/WEBSES/create.asp"),
                                  nil, form)
@@ -11066,8 +11073,11 @@ table.insert(fingerprints, {
     {username = "root", password = "calvin"}
   },
   login_check = function (host, port, path, user, pass)
+    local form = stdnse.output_table()
+    form.user = user
+    form.password = pass
     local resp = http_post_simple(host, port, url.absolute(path, "data/login"),
-                                 nil, {user=user, password=pass})
+                                 nil, form)
     return resp.status == 200
            and (resp.body or ""):find("<authResult>[05]</authResult>")
   end
