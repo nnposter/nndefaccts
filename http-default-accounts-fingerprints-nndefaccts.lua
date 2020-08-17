@@ -3380,7 +3380,7 @@ table.insert(fingerprints, {
     {username="", password=""}
   },
   login_check = function (host, port, path, user, pass)
-    local form = {URL=url.absolute(path, "/dashboard/index.html"),
+    local form = {URL=url.absolute(path, "dashboard/index.html"),
                   USER=user,
                   PASS=pass}
     local resp = http_post_simple(host, port,
@@ -11105,13 +11105,14 @@ table.insert(fingerprints, {
     {username = "root", password = "calvin"}
   },
   login_check = function (host, port, path, user, pass)
-    local referer = url.build(url_build_defaults(host, port, {path = url.absolute(path, "/restgui/start.html")}))
+    local referer = url.build(url_build_defaults(host, port, {path = url.absolute(path, "restgui/start.html")}))
     local header = {["Accept"]="application/json, text/plain, */*",
                     ["Referer"]=referer,
                     ["Origin"]=referer:gsub("%f[/]/%f[^/].*", ""),
                     ["user"]='"'..user..'"',
                     ["password"]='"'..pass..'"'}
-    local resp = http_post_simple(host, port, url.absolute(path, "sysmgmt/2015/bmc/session"),
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "sysmgmt/2015/bmc/session"),
                                  {header=header}, "")
     if not (resp.status == 201 and resp.body) then return false end
     local jstatus, jout = json.parse(resp.body)
