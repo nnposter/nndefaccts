@@ -11084,6 +11084,43 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Dell iDRAC9",
+  cpe = "cpe:/o:dell:idrac9_firmware",
+  category = "console",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302
+           and loc:find("/restgui/start%.html$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("<idrac-start-screen", 1, true)
+  end,
+  login_combos = {
+    {username = "root", password = "calvin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local referer = url.build(url_build_defaults(host, port, {path = url.absolute(path, "/restgui/start.html")}))
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Referer"]=referer,
+                    ["Origin"]=referer:gsub("%f[/]/%f[^/].*", ""),
+                    ["user"]='"'..user..'"',
+                    ["password"]='"'..pass..'"'}
+    local resp = http_post_simple(host, port, url.absolute(path, "sysmgmt/2015/bmc/session"),
+                                 {header=header}, "")
+    if not (resp.status == 201 and resp.body) then return false end
+    local jstatus, jout = json.parse(resp.body)
+    local auth = jstatus and jout.authResult
+    return auth == 0 or auth == 7 or auth == 9
+  end
+})
+
+table.insert(fingerprints, {
   name = "HP 9000 iLO",
   cpe = "cpe:/h:hp:integrated_lights-out",
   category = "console",
