@@ -11063,7 +11063,8 @@ table.insert(fingerprints, {
            and loc:find("/start%.html$")) then
       return false
     end
-    local resp = http_get_simple(host, port, loc)
+    local header = {["Accept-Encoding"]="gzip, deflate"}
+    local resp = http_get_simple(host, port, loc, {header=header})
     return resp.status == 200
            and resp.body
            and resp.body:find("%Wvar%s+isSCenabled%s*=")
@@ -11075,9 +11076,8 @@ table.insert(fingerprints, {
     local form = stdnse.output_table()
     form.user = user
     form.password = pass
-    local header = {["Accept-Encoding"]="gzip, deflate"}
     local resp = http_post_simple(host, port, url.absolute(path, "data/login"),
-                                 {header=header}, form)
+                                 nil, form)
     return resp.status == 200
            and (resp.body or ""):find("<authResult>[05]</authResult>")
   end
