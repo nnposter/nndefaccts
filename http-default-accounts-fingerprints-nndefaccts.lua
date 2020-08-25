@@ -11051,8 +11051,8 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Dell iDRAC6/7 (Mbedthis)",
-  cpe = "cpe:/o:dell:idrac7_firmware",
+  name = "Dell iDRAC6/iDRAC7/iDRAC8 (Mbedthis)",
+  cpe = "cpe:/o:dell:idrac*",
   category = "console",
   paths = {
     {path = "/"}
@@ -11075,8 +11075,9 @@ table.insert(fingerprints, {
     local form = stdnse.output_table()
     form.user = user
     form.password = pass
+    local header = {["Accept-Encoding"]="gzip, deflate"}
     local resp = http_post_simple(host, port, url.absolute(path, "data/login"),
-                                 nil, form)
+                                 {header=header}, form)
     return resp.status == 200
            and (resp.body or ""):find("<authResult>[05]</authResult>")
   end
