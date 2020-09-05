@@ -3300,6 +3300,27 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "USRobotics ADSL Gateway",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response) or ""
+    return realm:find("^U%.S%. Robotics ADSL %w+$")
+           or realm:find("^USR%d* ADSL Gateway$")
+  end,
+  login_combos = {
+    {username = "admin",   password = "admin"},
+    {username = "support", password = "support"},
+    {username = "user",    password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Westell",
   category = "routers",
   paths = {
