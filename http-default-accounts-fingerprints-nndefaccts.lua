@@ -3414,6 +3414,25 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Zhone ZNID",
+  cpe = "cpe:/o:dasanzhone:znid_*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.header["server"] == "micro_httpd"
+           and (http_auth_realm(response) or ""):find("%f[%w]ZNID%d%d[%dx][%dx]")
+  end,
+  login_combos = {
+    {username = "user", password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Zoom ADSL X5",
   category = "routers",
   paths = {
