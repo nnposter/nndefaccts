@@ -1897,11 +1897,11 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    local lurl = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
-    if not (response.status == 302 and lurl:find("/login$")) then
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302 and loc:find("/login$")) then
       return false
     end
-    local resp = http_get_simple(host, port, lurl)
+    local resp = http_get_simple(host, port, loc)
     return resp.status == 200
            and resp.body
            and resp.body:find("hashstack", 1, true)
@@ -5224,9 +5224,9 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    local lurl = response.header["location"] or ""
-    if not (response.status == 302 and lurl:find("/rhm$")) then return false end
-    local resp = http_get_simple(host, port, lurl)
+    local loc = response.header["location"] or ""
+    if not (response.status == 302 and loc:find("/rhm$")) then return false end
+    local resp = http_get_simple(host, port, loc)
     return http_auth_realm(resp) == "Aastra 5000"
   end,
   login_combos = {
