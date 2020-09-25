@@ -6999,7 +6999,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Planet IP Cam",
+  name = "PLANET IP Cam",
   category = "security",
   paths = {
     {path = "/"},
@@ -7016,7 +7016,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Planet IP Surveillance",
+  name = "PLANET IP Surveillance",
   category = "security",
   paths = {
     {path = "/"},
