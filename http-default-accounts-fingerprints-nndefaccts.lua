@@ -5274,6 +5274,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ateis Vox@",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Vox@", 1, true)
+           and response.body:lower():find("<title>vox@", 1, true)
+           and get_tag(response.body, "a", {href="/config%.html$"})
+  end,
+  login_combos = {
+    {username = "ateis", password = "ateis"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "config.html"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cisco TelePresence",
   category = "voip",
   paths = {
