@@ -5296,6 +5296,27 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "AudioCodes Mediant (basic auth)",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return http_auth_realm(response) == "Realm1"
+           and (response.header["server"] or ""):find("^Allegro%-Software%-RomPager/%d+%.")
+           and response.body
+           and response.body:lower():find("<title>protected object</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "Admin", password = "Admin"},
+    {username = "User",  password = "User"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cisco TelePresence",
   category = "voip",
   paths = {
