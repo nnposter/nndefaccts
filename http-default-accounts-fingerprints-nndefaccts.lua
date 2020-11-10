@@ -375,9 +375,8 @@ end
 -- @param html a string representing HTML test
 -- @param criteria a pattern to validate the extracted target URL
 -- for example {id="^secret$"}. The patterns are treated as case-insensitive.
--- (optional)
--- @param init a string position from which to start searching (optional)
--- @return table of tag attributes with their names converted to lowercase
+-- @return the refresh URL or nil (if the HTML does not contain a refresh tag
+-- or the refresh URL does not match the criteria)
 ---
 local function get_refresh_url (html, criteria)
   local refresh = get_tag(html, "meta", {["http-equiv"]="^refresh$", content="^0;%s*url="})
