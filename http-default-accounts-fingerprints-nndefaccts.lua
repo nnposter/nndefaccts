@@ -1806,6 +1806,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Amano TS-3000i",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("atvsUserPassword", 1, true)
+           and get_tag(response.body, "img", {src="/amano_header%.jpg$"})
+  end,
+  login_combos = {
+    {username = "Admin", password = "6569"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {atvsUserName=user,
+                  atvsUserPassword=pass,
+                  Submit="Login"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "Forms/index_1"),
+                                 nil, form)
+    return resp.status == 303
+           and (resp.header["location"] or ""):find("/Admin/device_info%.html$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "CapeSoft TimeClock",
   category = "web",
   paths = {
