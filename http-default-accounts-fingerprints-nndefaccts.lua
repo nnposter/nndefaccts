@@ -437,18 +437,22 @@ end
 -- Decodes an XML-encoded string.
 --
 -- @param s The string to be decoded.
--- @return A string with XML encoding stripped off
+-- @return A string with XML character references decoded
 ---
 local function xmldecode (s)
-  local refmap = {amp = "&", quot = "\"", apos = "'", lt ="<", gt = ">"}
-  return s:gsub("&.-;",
-               function (e)
-                 local r = e:sub(2,-2)
-                 if r:find("^#x%x%x$") then
-                   return stdnse.fromhex(r:sub(3))
-                 end
-                 return refmap[r]
-               end)
+  local refmap = {amp = 0x26, quot = 0x22, apos = 0x27, lt = 0x3C, gt = 0x3E}
+  return (s:gsub("&.-;",
+                function (e)
+                  local cp = nil
+                  if e:find("^&#x%x+;$") then
+                    cp = tonumber(e:sub(4, -2), 16)
+                  elseif e:find("^&#%d+;$") then
+                    cp = tonumber(e:sub(3, -2))
+                  else
+                    cp = refmap[e:sub(2, -2)]
+                  end
+                  return cp and cp <= 0xFF and string.char(cp) or nil
+                end))
 end
 
 ---
