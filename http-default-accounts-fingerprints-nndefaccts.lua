@@ -441,17 +441,17 @@ end
 ---
 local function xmldecode (s)
   local refmap = {amp = 0x26, quot = 0x22, apos = 0x27, lt = 0x3C, gt = 0x3E}
-  return (s:gsub("&.-;",
+  return (s:gsub("&(#?%w+);",
                 function (e)
                   local cp = nil
-                  if e:find("^&#x%x+;$") then
-                    cp = tonumber(e:sub(4, -2), 16)
-                  elseif e:find("^&#%d+;$") then
-                    cp = tonumber(e:sub(3, -2))
+                  if e:find("^#x%x+$") then
+                    cp = tonumber(e:sub(3), 16)
+                  elseif e:find("^#%d+$") then
+                    cp = tonumber(e:sub(2))
                   else
-                    cp = refmap[e:sub(2, -2)]
+                    cp = refmap[e]
                   end
-                  return cp and cp <= 0xFF and string.char(cp) or nil
+                  return cp and cp <= 0xFF and string.char(cp)
                 end))
 end
 
