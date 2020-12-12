@@ -2049,6 +2049,25 @@ table.insert(fingerprints, {
   end
 })
 
+table.insert(fingerprints, {
+  name = "Pentaho Admin Console",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response)
+    return (realm == "Pentaho" or realm == "Pentaho Enterprise Console")
+           and (response.header["server"] or ""):find("^Jetty%f[%W]")
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
 ---
 --ROUTERS
 ---
