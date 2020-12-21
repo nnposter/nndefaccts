@@ -2068,6 +2068,38 @@ table.insert(fingerprints, {
   end
 })
 
+table.insert(fingerprints, {
+  name = "Pentaho User Console",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Pentaho", 1, true)
+           and response.body:lower():find("<title>%s*pentaho business analytics%s*</title>")
+           and get_refresh_url(response.body, "/pentaho/?$")
+  end,
+  login_combos = {
+    {username = "admin", password = "password"},
+    {username = "joe",   password = "password"},
+    {username = "suzy",  password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {j_username=user,
+                  j_password=pass,
+                  locale="en_US"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "pentaho/j_spring_security_check"),
+                                 nil, form)
+    local loc = resp.header["location"] or ""
+    return resp.status == 302
+           and (loc:find("/pentaho/Home%f[;?\0]")
+             or loc:find("/pentaho/index%.jsp%f[?\0]"))
+  end
+})
+
 ---
 --ROUTERS
 ---
