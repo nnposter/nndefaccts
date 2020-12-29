@@ -2287,8 +2287,12 @@ table.insert(fingerprints, {
     {username = "cisco", password = "cisco"}
   },
   login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local len = tonumber(resp1.body:match("%Wfunction%s+en_value.-%Wfor%s*%(.-<%s*(%d+)%s*;"))
+    if not len then return false end
     pass = ("%s%02d"):format(pass, #pass)
-    pass = pass:rep(math.ceil(64 / #pass)):sub(1, 64)
+    pass = pass:rep(math.ceil(len / #pass)):sub(1, len)
     local form = {submit_button="login",
                   submit_type="",
                   gui_action="",
@@ -2298,10 +2302,10 @@ table.insert(fingerprints, {
                   user=user,
                   pwd=stdnse.tohex(openssl.md5(pass)),
                   sel_lang="EN"}
-    local resp = http_post_simple(host, port, url.absolute(path, "login.cgi"),
-                                 nil, form)
-    return resp.status == 200
-           and get_tag(resp.body or "", "input", {name="^session_key$", value="^%x+$"})
+    local resp2 = http_post_simple(host, port, url.absolute(path, "login.cgi"),
+                                  nil, form)
+    return resp2.status == 200
+           and get_tag(resp2.body or "", "input", {name="^session_key$", value="^%w+$"})
   end
 })
 
