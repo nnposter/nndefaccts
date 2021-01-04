@@ -4093,6 +4093,35 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "ZyXEL USG",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("/ext-js/images/usg/", 1, true)
+           and response.body:lower():find("<title>usg%d%d")
+           and get_tag(response.body, "input", {name="^loginTosslvpn$"})
+  end,
+  login_combos = {
+    {username = "zyfwp", password = "PrOw!aN_fXp"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {username=user,
+                  pwd=pass,
+                  pwd_r="",
+                  password=pass,
+                  loginTosslvpn="false"}
+    local resp = http_post_simple(host, port, path, nil, form)
+    return resp.status == 302
+           and resp.header["location"] == "ext-js/index.html"
+           and get_cookie(resp, "authtok", "^[%w+-]+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Adtran NetVanta",
   cpe = "cpe:/h:adtran:netvanta_*",
   category = "routers",
