@@ -4065,35 +4065,8 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "ZyXEL ZyWALL (var.2)",
-  category = "routers",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    return response.status == 200
-           and response.body
-           and response.body:find("ZyWALL", 1, true)
-           and response.body:lower():find("<title>zywall %w")
-           and get_tag(response.body, "input", {name="^pwd_r$"})
-  end,
-  login_combos = {
-    {username = "admin", password = "1234"}
-  },
-  login_check = function (host, port, path, user, pass)
-    local form = {username=user,
-                  pwd=pass,
-                  pwd_r="",
-                  password=pass}
-    local resp = http_post_simple(host, port, path, nil, form)
-    return resp.status == 302
-           and resp.header["location"] == "ext-js/web-pages/login/chgpw.html"
-           and get_cookie(resp, "authtok", "^[%w+-]+$")
-  end
-})
-
-table.insert(fingerprints, {
   name = "ZyXEL USG",
+  cpe = "cpe:/o:zyxel:usg*",
   category = "routers",
   paths = {
     {path = "/"}
@@ -4102,10 +4075,10 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("/ext-js/images/usg/", 1, true)
-           and response.body:lower():find("<title>usg%d%d")
            and get_tag(response.body, "input", {name="^loginTosslvpn$"})
   end,
   login_combos = {
+    {username = "admin", password = "1234"},
     {username = "zyfwp", password = "PrOw!aN_fXp"}
   },
   login_check = function (host, port, path, user, pass)
@@ -4116,7 +4089,6 @@ table.insert(fingerprints, {
                   loginTosslvpn="false"}
     local resp = http_post_simple(host, port, path, nil, form)
     return resp.status == 302
-           and resp.header["location"] == "ext-js/index.html"
            and get_cookie(resp, "authtok", "^[%w+-]+$")
   end
 })
