@@ -4036,7 +4036,8 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "ZyXEL ZyWALL (var.1)",
+  name = "ZyXEL ZyNOS",
+  cpe = "cpe:/o:zyxel:zynos_firmware",
   category = "routers",
   paths = {
     {path = "/"}
