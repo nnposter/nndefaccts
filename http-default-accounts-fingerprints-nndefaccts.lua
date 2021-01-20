@@ -2305,7 +2305,8 @@ table.insert(fingerprints, {
     local resp2 = http_post_simple(host, port, url.absolute(path, "login.cgi"),
                                   nil, form)
     return resp2.status == 200
-           and get_tag(resp2.body or "", "input", {name="^session_key$", value="^%w+$"})
+           and (get_tag(resp2.body or "", "input", {name="^session_key$", value="^%w+$"})
+             or resp2.body:find("%Wvar%s+login_st%s*=%s*3%s*;"))
   end
 })
 
