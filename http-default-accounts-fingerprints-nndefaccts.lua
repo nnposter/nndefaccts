@@ -2172,6 +2172,7 @@ table.insert(fingerprints, {
     if resp.status == 200
        and get_tag(resp.body or "", "input", {type="^hidden$", name="^thispage$", value="^forcedLogin%.htm$"}) then
       stdnse.debug1("User '%s' already logged in; credentials cannot be tested", user)
+      return false
     end
     return resp.status == 200
            and get_cookie(resp, "TeamF1Login", "^%w+$")
