@@ -248,7 +248,7 @@ end
 ---
 -- Parses an HTML tag and returns parsed attributes
 -- @param html a string representing HTML tag. It is expected that the first
--- and last characters are angle brackets.
+--             and last characters are angle brackets.
 -- @return table of attributes with their names converted to lowercase
 ---
 local function parse_tag (html)
@@ -279,11 +279,11 @@ end
 ---
 -- Searches given HTML string for an element tag that meets given attribute
 -- critera and returns its position and all its attributes
--- @param html a string representing HTML test
+-- @param html a string representing HTML text
 -- @param elem an element to search for (for example "img" or "div")
 -- @param criteria a table of attribute names and corresponding patterns,
--- for example {id="^secret$"}. The patterns are treated as case-insensitive.
--- (optional)
+--                 for example {id="^secret$"}.
+--                 The patterns are treated as case-insensitive. (optional)
 -- @param init a string position from which to start searching (optional)
 -- @return position of the opening angle bracket of the found tag or nil
 -- @return position of the closing angle bracket of the found tag or nil
@@ -317,11 +317,11 @@ end
 ---
 -- Searches given HTML string for an element tag that meets given attribute
 -- critera and returns all its attributes
--- @param html a string representing HTML test
+-- @param html a string representing HTML text
 -- @param elem an element to search for (for example "img" or "div")
 -- @param criteria a table of attribute names and corresponding patterns,
--- for example {id="^secret$"}. The patterns are treated as case-insensitive.
--- (optional)
+--                 for example {id="^secret$"}.
+--                 The patterns are treated as case-insensitive. (optional)
 -- @param init a string position from which to start searching (optional)
 -- @return table of tag attributes with their names converted to lowercase
 ---
@@ -332,12 +332,12 @@ end
 
 ---
 -- Builds an iterator function that searches given HTML string for element tags
--- that meets given attribute critera
--- @param html a string representing HTML test
+-- that meet given attribute critera
+-- @param html a string representing HTML text
 -- @param elem an element to search for (for example "img" or "div")
 -- @param criteria a table of attribute names and corresponding patterns,
--- for example {id="^secret$"}. The patterns are treated as case-insensitive.
--- (optional)
+--                 for example {id="^secret$"}.
+--                 The patterns are treated as case-insensitive. (optional)
 -- @param init a string position from which to start searching (optional)
 -- @return iterator
 ---
@@ -354,11 +354,11 @@ end
 -- Searches given HTML string for an element tag that meets given attribute
 -- critera and returns inner HTML of the corresponding element
 -- (Nested elements of the same type are not supported.)
--- @param html a string representing HTML test
+-- @param html a string representing HTML text
 -- @param elem an element to search for (for example "div" or "title")
 -- @param criteria a table of attribute names and corresponding patterns,
--- for example {id="^secret$"}. The patterns are treated as case-insensitive.
--- (optional)
+--                 for example {id="^secret$"}.
+--                 The patterns are treated as case-insensitive. (optional)
 -- @param init a string position from which to start searching (optional)
 -- @return inner HTML
 ---
@@ -372,7 +372,7 @@ end
 
 ---
 -- Searches given HTML string for a meta refresh tag and returns the target URL
--- @param html a string representing HTML test
+-- @param html a string representing HTML text
 -- @param criteria a pattern to validate the extracted target URL
 -- for example {id="^secret$"}. The patterns are treated as case-insensitive.
 -- @return the refresh URL or nil (if the HTML does not contain a refresh tag
@@ -407,9 +407,10 @@ end
 -- @param host The host the URL is intended for.
 -- @param port The port the URL is intended for.
 -- @param parsed Parsed URL, as typically returned by <code>url.parse</code>,
--- or nil. The table can be be missing the scheme, host, and port components.
+--               or nil. The table can be be missing the scheme, host, and port
+--               components. (optional)
 -- @return A clone of the parsed URL, with any missing scheme, host, and port
--- components added.
+--         components added.
 -- @see url.parse
 -- @see url.build
 ---
