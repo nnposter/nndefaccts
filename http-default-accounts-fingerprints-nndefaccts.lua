@@ -374,7 +374,8 @@ end
 -- Searches given HTML string for a meta refresh tag and returns the target URL
 -- @param html a string representing HTML text
 -- @param criteria a pattern to validate the extracted target URL
--- for example {id="^secret$"}. The patterns are treated as case-insensitive.
+--                 for example "/cgi%-bin/login$".
+--                 The pattern is treated as case-insensitive. (optional)
 -- @return the refresh URL or nil (if the HTML does not contain a refresh tag
 -- or the refresh URL does not match the criteria)
 ---
@@ -382,7 +383,7 @@ local function get_refresh_url (html, criteria)
   local refresh = get_tag(html, "meta", {["http-equiv"]="^refresh$", content="^0;%s*url="})
   if not refresh then return end
   local url = refresh.content:match("=(.*)")
-  return url:find(stringaux.ipattern(criteria)) and url or nil
+  return url:find(stringaux.ipattern(criteria or "")) and url or nil
 end
 
 ---
