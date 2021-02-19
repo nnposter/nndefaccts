@@ -387,6 +387,33 @@ local function get_refresh_url (html, criteria)
 end
 
 ---
+-- Extracts form input fields from a given HTML string
+-- @param html a string representing HTML text
+-- @param criteria a table of form attribute names and corresponding patterns,
+--                 for example {action="/login$"} to identify the appropriate
+--                 form. The patterns are treated as case-insensitive. If no
+--                 criteria are provided then the entire HTML string is treated
+--                 as the form inner HTML. (optional)
+-- @return a table of form input fields, together with their values, if any
+--         A fields without values are assigned empty strings, just as if they
+--         were submitted
+---
+local function get_form_fields (html, criteria)
+  if html and criteria then
+    html = get_tag_html(html, "form", criteria)
+  end
+  if not html then return end
+  local form = stdnse.output_table()
+  for input in get_tags(html, "input", {name=""}) do
+    local type = (input.type or "text"):lower()
+    if type == "hidden" or type == "text" or type == "password" then
+      form[input.name] = input.value or ""
+    end
+  end
+  return form
+end
+
+---
 -- Generates default scheme, host, and port components for a parsed URL.
 --
 -- This filter function generates the scheme, host, and port components from
@@ -587,13 +614,9 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local lurl = url.absolute(path, "users/login")
     local resp1 = http_get_simple(host, port, lurl)
-    if not (resp1.status == 200 and resp1.body) then return false end
-    local html = get_tag_html(resp1.body, "form", {action="/users/login$"})
-    if not html then return false end
-    local form = {}
-    for input in get_tags(html, "input", {type="^hidden$", name="", value=""}) do
-      form[input.name] = input.value
-    end
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {action="/users/login$"})
+    if not form then return false end
     form["data[User][username]"] = user
     form["data[User][password]"] = pass
     local resp2 = http_post_simple(host, port, lurl,
