@@ -2075,6 +2075,43 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Nuxeo Platform",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+              and response.body
+              and response.body:find("/nuxeo", 1, true)
+              and get_refresh_url(response.body, "/nuxeo/?$")
+            or response.status == 302
+              and (response.header["location"] or ""):find("/nuxeo/$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "nuxeo/"))
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/nuxeo/nxstartup%.faces$")
+  end,
+  login_combos = {
+    {username = "Administrator", password = "Administrator"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {user_name=user,
+                  user_password=pass,
+                  requestedUrl="",
+                  forceAnonymousLogin="",
+                  form_submitted_marker="",
+                  Submit="Log in"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "nuxeo/nxstartup.faces"),
+                                 nil, form)
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/nuxeo/nxpath/default[/@]")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Pentaho Admin Console",
   category = "web",
   paths = {
