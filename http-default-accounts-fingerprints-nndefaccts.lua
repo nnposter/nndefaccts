@@ -3314,6 +3314,47 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "D-Link DSR router",
+  cpe = "cpe:/h:d-link:dsr-*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = url.absolute(path, "scgi-bin/platform.cgi")
+    if not (response.status == 200
+           and response.body
+           and response.body:find(lurl, 1, true)
+           and get_refresh_url(response.body, "/scgi%-bin/platform%.cgi$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, lurl)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("D-Link", 1, true)
+           and get_tag(resp.body, "input", {name="^Users%.UserName$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "scgi-bin/platform.cgi")
+    local header = {["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+                    ["Referer"]=url.build(url_build_defaults(host, port, {path=lurl}))}
+    local form = stdnse.output_table()
+    form.thispage = "index.html"
+    form["Users.UserName"] = user
+    form["Users.Password"] = pass
+    form["button.login.Users.dashboard"] = "Login"
+    form["Login.userAgent"] = header["User-Agent"]
+    form.loggedInStatus = ""
+    local resp = http_post_simple(host, port, lurl, {header=header}, form)
+    return resp.status == 200
+           and get_cookie(resp, "TeamF1Login", "^%x+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "TP-Link (basic auth)",
   cpe = "cpe:/o:tp-link:lm_firmware",
   category = "routers",
