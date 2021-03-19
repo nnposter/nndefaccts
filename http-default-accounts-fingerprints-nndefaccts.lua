@@ -8110,14 +8110,14 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
+    local lurl = "Pages/login.htm"
     if not (response.status == 200
            and response.body
-           and response.body:find("Pages/login.htm", 1, true)
+           and response.body:find(lurl, 1, true)
            and response.body:find("%Wwindow%.location%.href%s*=%s*(['\"])Pages/login%.htm%1")) then
       return false
     end
-    local resp = http_get_simple(host, port,
-                                url.absolute(path, "Pages/login.htm"))
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return resp.status == 200
            and resp.body
            and resp.body:find("IDCS_LOGIN_NBSP", 1, true)
