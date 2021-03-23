@@ -8088,10 +8088,14 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    local lurl = response.status == 200
-                 and get_refresh_url(response.body or "", "/user/view%.html$")
-    if not lurl then return false end
-    local resp = http_get_simple(host, port, lurl)
+    local lurl = "user/view.html"
+    if not (response.status == 200
+           and response.body
+           and response.body:find(lurl, 1, true)
+           and get_refresh_url(response.body, "/user/view%.html$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return (http_auth_realm(resp) or ""):find("^IPVideo_%x+$")
   end,
   login_combos = {
