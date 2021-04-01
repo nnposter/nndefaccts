@@ -382,7 +382,7 @@ end
 local function get_refresh_url (html, criteria)
   local refresh = get_tag(html, "meta", {["http-equiv"]="^refresh$", content="^0;%s*url="})
   if not refresh then return end
-  local url = refresh.content:match("=(.*)")
+  local url = refresh.content:match("=['\"]?([^'\"]*)")
   return url:find(stringaux.ipattern(criteria or "")) and url or nil
 end
 
