@@ -491,7 +491,7 @@ end
 -- @return A URL-encoded string
 ---
 local function urlencode_all (s)
-  return (s:gsub(".", function (c) return ("%%%02x"):format(c:byte()) end))
+  return (s:gsub(".", function (c) return ("%%%02X"):format(c:byte()) end))
 end
 
 ---
