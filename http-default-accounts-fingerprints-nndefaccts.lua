@@ -341,8 +341,8 @@ end
 -- @param init a string position from which to start searching (optional)
 -- @return iterator
 ---
-local function get_tags (html, elem, criteria)
-  local init = 0
+local function get_tags (html, elem, criteria, init)
+  init = (init or 1) - 1
   return function ()
            local _, attrs
            _, init, attrs = find_tag(html, elem, criteria, (init or #html) + 1)
