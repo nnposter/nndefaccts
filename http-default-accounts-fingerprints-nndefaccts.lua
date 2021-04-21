@@ -8809,7 +8809,7 @@ table.insert(fingerprints, {
                                 url.absolute(path, "ui/LogOn?ReturnUrl=%2fui"))
     return resp.status == 200
            and resp.body
-           and resp.body:find("/genetec.")
+           and resp.body:find("/genetec.common.js", 1, true)
   end,
   login_combos = {
     {username = "admin", password = "softwire"}
