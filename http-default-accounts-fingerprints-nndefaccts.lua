@@ -11185,9 +11185,9 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local header = {Authorization="Basic " .. base64.enc(user .. ":" .. pass),
                     CIMProtocolVersion="1.0",
-		    CIMOperation="MethodCall",
-		    CIMMethod=urlencode_all("CreateSessionToken"):upper(),
-                    CIMObject=urlencode_all("root/cimv2:VAMI_Authentication"):upper(),
+                    CIMOperation="MethodCall",
+                    CIMMethod=urlencode_all("CreateSessionToken"),
+                    CIMObject=urlencode_all("root/cimv2:VAMI_Authentication"),
                     ["Content-Type"]="application/xml; charset=UTF-8"}
     local msg = [[
       <?xml version="1.0" encoding="UTF-8"?>
