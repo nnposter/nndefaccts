@@ -326,7 +326,7 @@ end
 -- @return table of tag attributes with their names converted to lowercase
 ---
 local function get_tag (html, elem, criteria, init)
-  local start, stop, attrs = find_tag(html, elem, criteria, init)
+  local _, _, attrs = find_tag(html, elem, criteria, init)
   return attrs
 end
 
@@ -363,7 +363,7 @@ end
 -- @return inner HTML
 ---
 local function get_tag_html (html, elem, criteria, init)
-  local _, start, attrs = find_tag(html, elem, criteria, init)
+  local _, start = find_tag(html, elem, criteria, init)
   if not start then return end
   start = start + 1
   local stop = html:find(stringaux.ipattern("</" .. elem:gsub("%-", "%%-") .. "[%s>]"), start)
