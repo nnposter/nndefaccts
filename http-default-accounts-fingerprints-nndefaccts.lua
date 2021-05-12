@@ -376,14 +376,14 @@ end
 -- @param criteria a pattern to validate the extracted target URL
 --                 for example "/cgi%-bin/login$".
 --                 The pattern is treated as case-insensitive. (optional)
--- @return the refresh URL or nil (if the HTML does not contain a refresh tag
--- or the refresh URL does not match the criteria)
+-- @return the target URL or nil (if the HTML does not contain a refresh tag
+-- or the target URL does not match the criteria)
 ---
 local function get_refresh_url (html, criteria)
   local refresh = get_tag(html, "meta", {["http-equiv"]="^refresh$", content="^0;%s*url="})
   if not refresh then return end
-  local url = refresh.content:match("=['\"]?([^'\"]*)")
-  return url:find(stringaux.ipattern(criteria or "")) and url or nil
+  local target = refresh.content:match("=['\"]?([^'\"]*)")
+  return target:find(stringaux.ipattern(criteria or "")) and target or nil
 end
 
 ---
