@@ -3574,6 +3574,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Tilgin",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Tilgin", 1, true)
+           and get_tag(response.body, "button", {name="^__auth$", value="^login$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {__user=user,
+                  __pass=pass,
+                  __auth="login"}
+    local resp = http_post_simple(host, port, path, nil, form)
+    return resp.status == 303
+           and resp.header["location"] == path
+           and get_cookie(resp, "auth", "^%d+:main/%d+:")
+  end
+})
+
+table.insert(fingerprints, {
   name = "TrendChip ADSL Modem",
   category = "routers",
   paths = {
