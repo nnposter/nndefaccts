@@ -365,6 +365,9 @@ end
 local function get_tag_html (html, elem, criteria, init)
   local _, start = find_tag(html, elem, criteria, init)
   if not start then return end
+  if html:sub(start - 1, start - 1) == "/" then
+    return ""
+  end
   start = start + 1
   local stop = html:find(stringaux.ipattern("</" .. elem:gsub("%-", "%%-") .. "[%s>]"), start)
   return stop and html:sub(start, stop - 1) or nil
