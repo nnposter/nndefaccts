@@ -8841,6 +8841,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Vanderbilt SPC",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("SPC", 1, true)
+           and response.body:lower():find("<title>%s*spc%d+ ")
+           and get_tag(response.body, "form", {action="^login%.htm%?action=login"})
+  end,
+  login_combos = {
+    {username = "Engineer", password = "1111"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {userid=user,
+                  password=pass}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "login.htm?action=login&language=253"),
+                                 nil, form)
+    return resp.status == 200
+           and get_tag(resp.body or "", "a", {href="^secure%.htm%?session=0?x?%x+&page="})
+  end
+})
+
+table.insert(fingerprints, {
   name = "Genetec Synergis",
   category = "security",
   paths = {
