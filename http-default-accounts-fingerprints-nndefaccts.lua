@@ -213,7 +213,8 @@ local function try_http_auth (host, port, path, user, pass, digest)
   end
   local creds = {username = user, password = pass, digest = digest}
   local resp = http_get_simple(host, port, path, {auth=creds})
-  return resp.status and not (resp.status >= 400 and resp.status <= 405)
+  local status = resp.status
+  return status and not (status >= 400 and status <= 405 or status >= 500)
 end
 
 ---
