@@ -337,7 +337,7 @@ end
 -- @param html a string representing HTML text
 -- @param elem an element to search for (for example "img" or "div")
 -- @param criteria a table of attribute names and corresponding patterns,
---                 for example {id="^secret$"}.
+--                 for example {type="^hidden$"}.
 --                 The patterns are treated as case-insensitive. (optional)
 -- @param init a string position from which to start searching (optional)
 -- @return iterator
