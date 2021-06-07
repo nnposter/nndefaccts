@@ -476,7 +476,7 @@ local function xmldecode (s)
   local refmap = {amp = 0x26, quot = 0x22, apos = 0x27, lt = 0x3C, gt = 0x3E}
   return (s:gsub("&(#?%w+);",
                 function (e)
-                  local cp = nil
+                  local cp
                   if e:find("^#x%x+$") then
                     cp = tonumber(e:sub(3), 16)
                   elseif e:find("^#%d+$") then
