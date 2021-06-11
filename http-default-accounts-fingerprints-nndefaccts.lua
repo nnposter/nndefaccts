@@ -4622,8 +4622,11 @@ table.insert(fingerprints, {
     {username = "admin", password = "admin"}
   },
   login_check = function (host, port, path, user, pass)
-    local lurl = ("cgi-bin/login.cgi?username=%s&password=%s&Submit=Login"):format(
-                 url.escape(user), url.escape(pass))
+    local form = stdnse.output_table()
+    form.username = user
+    form.password = pass
+    form.Submit = "Login"
+    local lurl = "cgi-bin/login.cgi?" .. url.build_query(form)
     local resp = http_get_simple(host, port, url.absolute(path, lurl))
     return resp.status == 200
            and get_cookie(resp, "sessionID", ".")
