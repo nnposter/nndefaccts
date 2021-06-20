@@ -3555,6 +3555,24 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "NST Globalist Spread Router",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response)
+    return realm == "SpreadRouter Serise WebUI" or realm == "Settings WebUI"
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Planex Broad Lanner",
   cpe = "cpe:/h:planex:brl-*",
   category = "routers",
