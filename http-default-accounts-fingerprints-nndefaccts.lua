@@ -11645,8 +11645,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Supermicro IPMI",
-  cpe = "cpe:/o:supermicro:intelligent_platform_management_firmware",
+  name = "ATEN IPMI",
   category = "console",
   paths = {
     {path = "/"}
@@ -11655,15 +11654,18 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("ATEN International", 1, true)
-           and response.body:find("/cgi/login.cgi", 1, true)
+           and get_tag(response.body, "meta", {name="^ATEN International"})
+           and get_tag(response.body, "form", {action="/cgi/login%.cgi$"})
   end,
   login_combos = {
     {username = "ADMIN", password = "ADMIN"}
   },
   login_check = function (host, port, path, user, pass)
-    local resp = http_post_simple(host, port, url.absolute(path, "cgi/login.cgi"),
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "cgi/login.cgi"),
                                  nil, {name=user, pwd=pass})
     return resp.status == 200
            and (resp.body or ""):find("../cgi/url_redirect.cgi?url_name=mainmenu", 1, true)
+           and get_cookie(resp, "SID", "^%w+$")
   end
 })
