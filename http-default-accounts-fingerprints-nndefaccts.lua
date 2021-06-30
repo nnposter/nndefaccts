@@ -32,6 +32,9 @@ provide generic feedback, etc., please see instructions posted at
 <https://github.com/nnposter/nndefaccts/blob/master/README.md>.
 ]]
 
+-- luacheck: std lua53, new globals fingerprints
+-- luacheck: ignore 212/host 212/port 212/path 212/user 212/pass
+-- luacheck: no max line length
 
 local base64 = require "base64"
 local http = require "http"
@@ -8671,7 +8674,7 @@ table.insert(fingerprints, {
     local params = jstatus and jout.params
     if not params then return false end
     local passtype
-    if not params.encryption then
+    if not params.encryption then -- luacheck: ignore 542
     elseif params.encryption == "Basic" then
       pass = base64.enc(user .. ":" .. pass)
     elseif params.encryption == "Default" then
