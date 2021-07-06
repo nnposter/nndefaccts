@@ -11689,3 +11689,26 @@ table.insert(fingerprints, {
            and get_cookie(resp, "SID", "^%w+$")
   end
 })
+
+table.insert(fingerprints, {
+  name = "Jenkins Unauthed",
+  cpe = "",
+  category = "web",
+  paths = {
+    {path = "/login"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Jenkins", 1, true)
+  end,
+  login_combos = {
+    {username = "", password = "unathed access to dashboard"},
+    {username = "manage", password = "unauthed access to management"},
+    {username = "view/all/newJob", password = "unauthed access to create a new job (RCE!)"},
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_get_simple(host, port, url.absolute(path, user))
+    return resp.status == 200
+  end
+})
