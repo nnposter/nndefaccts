@@ -5846,8 +5846,16 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local qstr = url.build_query({t=os.date("!%a, %d %b %Y %H:%M:%S GMT")})
+
+    local creds_alt = {username = user, password = pass, digest = false}
+    local resp_alt = http_post_simple(host, port,
+                                 url.absolute(path, "form-submit/auth.htm"),
+                                 {auth=creds_alt}, "")
+
     return try_http_auth(host, port, url.absolute(path, "auth.htm?" .. qstr),
                         user, pass, false)
+                        or
+                        (resp_alt.status == 200 and get_cookie(resp_alt,"session"))
   end
 })
 
