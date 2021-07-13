@@ -5862,7 +5862,7 @@ table.insert(fingerprints, {
            and response.body
            and response.body:find("Polycom", 1, true)
            and response.body:find("submitLoginInfo", 1, true)
-           and response.body:lower():find("<title>polycom - configuration utility</title>", 1, true)
+           and response.body:lower():find("<title>polyc?o?m? %- configuration utility</title>")
            and get_tag(response.body, "input", {name="^password$", autocomplete="^off$"})
   end,
   login_combos = {
