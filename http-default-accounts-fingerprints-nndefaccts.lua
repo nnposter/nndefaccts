@@ -4824,6 +4824,38 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Digi ConnectPort",
+  category = "routers",
+  paths = {
+    {path = "/login.htm"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("ConnectPort", 1, true)
+           and response.body:lower():find("<title>%s*connectport%W")
+           and get_tag(response.body, "form", {action="/Forms/login_1$"})
+  end,
+  login_combos = {
+    {username = "root", password = "dbps"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {action="/Forms/login_1$"})
+    if not form then return false end
+    form.username = user
+    form.password = pass
+    form.btLogin = "Login"
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "Forms/login_1"),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 303
+           and (resp2.header["location"] or ""):find("/home%.htm$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sea Tel MXP",
   category = "routers",
   paths = {
