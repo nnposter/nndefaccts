@@ -3616,7 +3616,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Tilgin",
+  name = "Tilgin (var.1)",
   category = "routers",
   paths = {
     {path = "/"}
@@ -3638,6 +3638,38 @@ table.insert(fingerprints, {
     return resp.status == 303
            and resp.header["location"] == path
            and get_cookie(resp, "auth", "^%d+:main/%d+:")
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Tilgin (var.2)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Tilgin", 1, true)
+           and response.body:find("CryptoJS.HmacSHA1", 1, true)
+           and get_tag(response.body, "input", {name="^__hash$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local key = resp1.body:match("=%s*CryptoJS%.HmacSHA1%([^)]-['\"](%x+)['\"]%s*%)")
+    if not key then return false end
+    local form = {__formtok="",
+                  __user=user,
+                  __auth="login",
+                  __hash=stdnse.tohex(openssl.hmac("SHA1", key, user .. pass))}
+    local resp2 = http_post_simple(host, port, path, nil, form)
+    return resp2.status == 303
+           and resp2.header["location"] == path
+           and get_cookie(resp2, "auth", "^%d+:%d+:main/%d+:")
   end
 })
 
