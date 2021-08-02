@@ -387,7 +387,7 @@ end
 -- or the target URL does not match the criteria)
 ---
 local function get_refresh_url (html, criteria)
-  local refresh = get_tag(html, "meta", {["http-equiv"]="^refresh$", content="^0;%s*url="})
+  local refresh = get_tag(html, "meta", {["http-equiv"]="^refresh$", content="^%d;%s*url="})
   if not refresh then return end
   local target = refresh.content:match("=['\"]?([^'\"]*)")
   return target:find(stringaux.ipattern(criteria or "")) and target or nil
