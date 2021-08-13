@@ -9164,6 +9164,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("secure/ltx_conf.htm", 1, true)
+           and get_refresh_url(response.body, "^secure/ltx_conf%.htm$")
   end,
   login_combos = {
     {username = "",  password = ""}
