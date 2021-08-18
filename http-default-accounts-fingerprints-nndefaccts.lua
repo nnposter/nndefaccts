@@ -5897,12 +5897,16 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200
+    if not (response.status == 200
            and response.body
            and response.body:find("Polycom", 1, true)
            and response.body:find("submitLoginInfo", 1, true)
-           and response.body:lower():find("<title>polycom - configuration utility</title>", 1, true)
-           and get_tag(response.body, "body", {onload="^document%.login%.password%.focus%(%)$"})
+           and response.body:lower():find("<title>polyc?o?m? %- configuration utility</title>")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "js/login.js"))
+    return resp.status == 200
+           and (resp.body or ""):find("%Wurl:%s*(['\"])auth%.htm%?t=")
   end,
   login_combos = {
     {username = "Polycom", password = "456"},
@@ -5910,8 +5914,15 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local qstr = url.build_query({t=os.date("!%a, %d %b %Y %H:%M:%S GMT")})
-    return try_http_auth(host, port, url.absolute(path, "auth.htm?" .. qstr),
-                        user, pass, false)
+    local creds = {username = user, password = pass, digest = false}
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=path}))}
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, "auth.htm?" .. qstr),
+                                {auth=creds, header=header})
+    return resp.status == 200
+           and resp.body
+           and (resp.body:find("|SUCCESS|", 1, true)
+             or get_tag(resp.body, "html"))
   end
 })
 
@@ -5922,12 +5933,16 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200
+    if not (response.status == 200
            and response.body
            and response.body:find("Polycom", 1, true)
            and response.body:find("submitLoginInfo", 1, true)
-           and response.body:lower():find("<title>polyc?o?m? %- configuration utility</title>")
-           and get_tag(response.body, "input", {name="^password$", autocomplete="^off$"})
+           and response.body:lower():find("<title>polyc?o?m? %- configuration utility</title>")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "js/login.js"))
+    return resp.status == 200
+           and (resp.body or ""):find("%Wurl:%s*(['\"])[^'\"]-/form%-submit/auth%.htm%1")
   end,
   login_combos = {
     {username = "Polycom", password = "456"},
@@ -5939,7 +5954,8 @@ table.insert(fingerprints, {
                                  url.absolute(path, "form-submit/auth.htm"),
                                  {auth=creds}, "")
     return resp.status == 200
-           and (resp.body or ""):find("|SUCCESS|", 1, true)
+           and ((resp.body or ""):find("|SUCCESS|", 1, true)
+             or get_cookie(resp, "session", "."))
   end
 })
 
