@@ -4013,6 +4013,52 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Netgear ProSafe Firewall FVS318G, SRX5308",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = url.absolute(path, "scgi-bin/platform.cgi")
+    if not (response.status == 200
+           and response.body
+           and response.body:find(lurl, 1, true)
+           and get_refresh_url(response.body, "/scgi%-bin/platform%.cgi$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, lurl)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("NETGEAR", 1, true)
+           and get_tag(resp.body, "input", {name="^USERDBUsers%.UserName$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "password"},
+    {username = "guest", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "scgi-bin/platform.cgi")
+    local header = {["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+                    ["Referer"]=url.build(url_build_defaults(host, port, {path=lurl}))}
+    local form = stdnse.output_table()
+    form.thispage = "index.htm"
+    form["USERDBUsers.UserName"] = user
+    form["USERDBUsers.Password"] = pass
+    form["USERDBDomains.Domainname"] = "geardomain"
+    form["button.login.USERDBUsers.router_status"] = "Login"
+    form["Login.userAgent"] = header["User-Agent"]
+    local resp = http_post_simple(host, port, lurl, {header=header}, form)
+    if resp.status == 200
+       and get_tag(resp.body or "", "input", {type="^hidden$", name="^thispage$", value="^forcedLogin%.htm$"}) then
+      stdnse.debug1("User '%s' already logged in; credentials cannot be tested", user)
+      return false
+    end
+    return resp.status == 200
+           and get_cookie(resp, "TeamF1Login", "^%w+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Netgear Router (legacy)",
   category = "routers",
   paths = {
