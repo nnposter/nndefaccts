@@ -5127,6 +5127,31 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Microhard Systems (var.2)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 401
+           and response.body == "Authorization Required\n"
+           and response.header["keep-alive"] == "timeout=20"
+           and (response.header["www-authenticate"] or ""):find("^Basic%s")
+  end,
+  login_combos = {
+    {username = "admin",    password = "admin"},
+    {username = "admin",    password = "tamaani"},
+    {username = "upgrade",  password = "admin"},
+    {username = "testlab",  password = "testlab"},
+    {username = "testlab1", password = "testlab1"},
+    {username = "msshc",    password = "msshc"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "NetComm ADSL router",
   category = "routers",
   paths = {
