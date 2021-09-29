@@ -5152,6 +5152,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Microhard Systems (var.3)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("cgi-bin/webif/system-info.sh", 1, true)
+           and get_refresh_url(response.body, "%f[%w]cgi%-bin/webif/system%-info%.sh$")
+  end,
+  login_combos = {
+    {username = "admin",    password = "admin"},
+    {username = "admin",    password = "tamaani"},
+    {username = "upgrade",  password = "admin"},
+    {username = "testlab",  password = "testlab"},
+    {username = "testlab1", password = "testlab1"},
+    {username = "msshc",    password = "msshc"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port,
+                        url.absolute(path, "cgi-bin/webif/system-info.sh"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "NetComm ADSL router",
   category = "routers",
   paths = {
