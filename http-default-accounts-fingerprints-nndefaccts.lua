@@ -5534,6 +5534,46 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ruckus ZoneDirector 9.x",
+  cpe = "cpe:/o:ruckus:zonedirector_firmware",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302 and loc:find("/admin/login%.jsp$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and get_cookie(resp, "-ejs-session-", "^x%x+$")
+           and resp.body
+           and resp.body:find("ZoneDirector", 1, true)
+           and get_tag(resp.body, "a", {href="^https?://www%.ruckuswireless%.com%f[/\0]"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "admin", password = "password"},
+    {username = "super", password = "sp-admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "admin/login.jsp")
+    local resp1 = http_get_simple(host, port, lurl)
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {action="^login%.jsp$"})
+    if not form then return false end
+    form.username = user
+    form.password = pass
+    form.ok = (get_tag(resp1.body, "input", {type="^submit$", name="^ok$"}) or {}).value
+    local resp2 = http_post_simple(host, port, lurl,
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 302
+           and (resp2.header["location"] or ""):find("/admin/dashboard%.jsp%f[?\0]")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Nortel VPN Router",
   cpe = "cpe:/h:nortel:vpn_router_*",
   category = "routers",
