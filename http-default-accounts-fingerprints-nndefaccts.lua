@@ -5574,6 +5574,36 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ruckus IoT Controller",
+  cpe = "cpe:/a:commscope:ruckus_iot_controller",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", ""):gsub("#.*", "")
+    if not (response.status == 302 and loc:find("/refUI/$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("RIoT Controller", 1, true)
+           and resp.body:lower():find("<title>riot controller</title>", 1, true)
+           and get_tag(resp.body, "script", {src="/refUI/static/js/main%.%x+.chunk%.js$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "nplus1user", password = "nplus1user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port,
+                        url.absolute(path, "v1/oauth/login?format=json"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Nortel VPN Router",
   cpe = "cpe:/h:nortel:vpn_router_*",
   category = "routers",
