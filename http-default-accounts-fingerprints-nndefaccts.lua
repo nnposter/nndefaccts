@@ -5574,6 +5574,42 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Ruckus ZoneDirector 10.x",
+  cpe = "cpe:/o:ruckus:zonedirector_firmware",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302 and loc:find("/admin10/login%.jsp$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and get_cookie(resp, "-ejs-session-", "^x%x+$")
+           and resp.body
+           and resp.body:find("X-Ruckus-Auth", 1, true)
+           and get_tag(resp.body, "meta", {["http-equiv"]="^X%-Ruckus%-Auth$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "admin", password = "password"},
+    {username = "super", password = "sp-admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {username=user,
+                  password=pass,
+                  ok=""}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "admin10/login.jsp"),
+                                 nil, form)
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/admin10/dashboard%.jsp%f[?\0]")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Ruckus IoT Controller",
   cpe = "cpe:/a:commscope:ruckus_iot_controller",
   category = "routers",
