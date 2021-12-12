@@ -2194,6 +2194,60 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Cisco RV180",
+  cpe = "cpe:/h:cisco:rv180_vpn_router",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = url.absolute(path, "platform.cgi")
+    local resp = response
+    if response.status == 200
+       and response.body
+       and response.body:find(lurl, 1, true)
+       and get_refresh_url(response.body, "/platform%.cgi$") then
+      resp = http_get_simple(host, port, lurl)
+    end
+    if resp.status == 200
+       and resp.body
+       and resp.body:find("frmRedirectToTop", 1, true)
+       and get_tag(resp.body, "body", {onload="frmRedirectToTop"}) then
+      local form = stdnse.output_table()
+      form.thispage = "index.htm"
+      form.statusMsg = ""
+      form.reload = 0
+      local header = {["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+                      ["Referer"]=url.build(url_build_defaults(host, port, {path=lurl}))}
+      resp = http_post_simple(host, port, lurl, {header=header}, form)
+    end
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("Cisco", 1, true)
+           and get_tag(resp.body, "input", {type="^text$", name="^users%.username$"})
+  end,
+  login_combos = {
+    {username = "cisco", password = "cisco"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "platform.cgi")
+    local header = {["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+                    ["Referer"]=url.build(url_build_defaults(host, port, {path=lurl}))}
+    local form = stdnse.output_table()
+    form.thispage = "index.htm"
+    form.reload = 0
+    form["users.username"] = user
+    form["users.password"] = pass
+    form["button.login.users.home"] = "Log In"
+    form["Login.userAgent"] = header["User-Agent"]
+    local resp = http_post_simple(host, port, lurl, {header=header}, form)
+    return resp.status == 200
+           and (get_cookie(resp, "TeamF1Login", "^%w+$")
+             or get_tag(resp.body or "", "input", {type="^hidden$", name="^thispage$", value="^forcedLogin%.htm$"}))
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cisco RV22x, SA520",
   category = "routers",
   paths = {
