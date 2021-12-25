@@ -3547,6 +3547,27 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Billion BiPAC",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response) or ""
+    return realm:find("^BiPAC %d%d%d%d[%u%d ]*$")
+           or realm:find("^8700AX: ")
+  end,
+  login_combos = {
+    {username = "admin",   password = "admin"},
+    {username = "user",    password = "user"},
+    {username = "support", password = "support"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Comtrend NexusLink-5631",
   category = "routers",
   paths = {
