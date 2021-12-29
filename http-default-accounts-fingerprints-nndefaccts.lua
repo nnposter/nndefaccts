@@ -6191,6 +6191,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Asterisk PBX",
+  category = "voip",
+  paths = {
+    {path = "/login.html"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("js/astman.js", 1, true)
+           and get_tag(response.body, "input", {id="^secret$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {action="login",
+                  username=user,
+                  secret=pass}
+    local lurl = "AMI/rawman?" .. url.build_query(form)
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and (resp.body or ""):find("^%s*Response:%s*Success%W")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Polycom SoundPoint (var.1)",
   category = "voip",
   paths = {
