@@ -2303,6 +2303,54 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Cisco RV042/RV082",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = url.absolute(path, "cgi-bin/welcome.cgi")
+    if not (have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find(lurl, 1, true)
+           and get_refresh_url(response.body, "/cgi%-bin/welcome%.cgi$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, lurl)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("Cisco", 1, true)
+           and get_tag(resp.body, "form", {name="^form_contents$", action="/cgi%-bin/userLogin%.cgi$"})
+           and get_tag(resp.body, "input", {name="^auth_key$", type="^hidden$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "cisco", password = "cisco"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(path, "cgi-bin/welcome.cgi"))
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {name="^form_contents$", action="/cgi%-bin/userLogin%.cgi$"})
+    if not (form and form.auth_key) then return false end
+    form.username = user
+    local password = stdnse.tohex(openssl.md5(pass .. form.auth_key)):lower()
+    local token = resp1.body:match("%Wvar%s+tmp2%s*=%s*['\"]([^'\"]+)")
+    if token then
+      password = stdnse.tohex(openssl.digest("SHA256", token .. password)):lower()
+    end
+    form.password = password
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "cgi-bin/userLogin.cgi"),
+                                  nil, form)
+    return resp2.status == 200
+           and get_refresh_url(resp2.body or "", "/default%.htm$")
+           and get_cookie(resp2, "mlap", ".")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cisco RV32x",
   category = "routers",
   paths = {
