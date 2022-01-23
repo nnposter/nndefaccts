@@ -10082,7 +10082,12 @@ table.insert(fingerprints, {
                                  nil, form)
     local loc = resp.header["location"]
     if not (resp.status == 303 and loc) then return false end
-    if loc:find("/home%.htm$") then return true end
+    if loc:find("/home%.htm$") then
+      http_get_simple(host, port,
+                     url.absolute(loc:gsub("^https?://[^/]*", ""), "logout.htm"),
+                     {cookies=resp.cookies})
+      return true
+    end
     for _, ck in ipairs(resp.cookies or {}) do
       if ck.name:find("^APC") then return true end
     end
