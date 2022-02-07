@@ -10831,6 +10831,41 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Xerox AltaLink",
+  cpe = "cpe:/o:xerox:altalink_*",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Xerox", 1, true)
+           and response.body:find("%Wdocument%.location%s*=%s*(['\"])[^'\"]*/stat/welcome%.php%?tab=status%1%s*;")
+  end,
+  login_combos = {
+    {username = "admin", password = "1111"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(path, "properties/authentication/login.php"))
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {action="/userpost/xerox%.set$"})
+    if not form then return false end
+    form.frmwebUsername = user
+    form.frmwebPassword = pass
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "userpost/xerox.set"),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 200
+           and resp2.body
+           and (resp2.body:find("%Wwindow%.opener%.top%.location%s*=%s*window%.opener%.top%.location%.href%s*;")
+             or resp2.body:find("%Wdocument%.location%s*=%s*(['\"])['\"]-/stat/welcome%.php%?tab=status%1%s*;")
+             or resp2.body:find("%Wdocument%.location%s*=%s*(['\"])['\"]-/properties/blank%.php%1%s*;"))
+  end
+})
+
+table.insert(fingerprints, {
   name = "Xerox CentreWare (var.1)",
   category = "printer",
   paths = {
