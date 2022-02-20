@@ -10580,6 +10580,30 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "OKI printer",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("okilogo", 1, true)
+           and get_tag(response.body, "frame", {src="^status_toc%.htm$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "aaaaaa"},
+    {username = "root",  password = "aaaaaa"},
+    {username = "admin", password = "999999"},
+    {username = "root",  password = "999999"},
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "setupfrm.htm"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "RICOH Web Image Monitor",
   category = "printer",
   paths = {
