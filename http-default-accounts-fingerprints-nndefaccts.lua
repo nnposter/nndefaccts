@@ -10773,6 +10773,7 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("/js/TopAccessUtil.js", 1, true)
+           and get_tag(response.body, "script", {src="/js/TopAccessUtil%.js%f[\0?]"})
   end,
   login_combos = {
     {username = "admin", password = "123456"}
