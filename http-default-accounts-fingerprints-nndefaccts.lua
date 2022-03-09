@@ -10797,7 +10797,7 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local resp1 = http_get_simple(host, port, path)
-    local token = resp1.status == 200 and get_cookie(resp1, "session", ".")
+    local token = resp1.status == 200 and get_cookie(resp1, "Session", ".")
     if not token then return false end
     local ipaddr = token:match("^(.+)%.")
     if not ipaddr then return false end
@@ -10868,7 +10868,7 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "ADMIN/Login"),
                                  nil, {USERNAME=user,PASS=pass})
-    return resp.status == 301 and get_cookie(resp, "sessid", "^0,%x+$")
+    return resp.status == 301 and get_cookie(resp, "SESSID", "^0,%x+$")
   end
 })
 
