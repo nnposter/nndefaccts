@@ -10923,16 +10923,18 @@ table.insert(fingerprints, {
     {username = "admin", password = "1111"}
   },
   login_check = function (host, port, path, user, pass)
-    local form = {_fun_function="HTTP_Authenticate_fn",
-                  NextPage=url.absolute(path, "properties/authentication/luidLogin.php"),
-                  webUsername=user,
-                  webPassword=pass,
-                  frmaltDomain="default"}
-    local resp = http_post_simple(host, port,
-                                 url.absolute(path, "userpost/xerox.set"),
-                                 nil, form)
-    return resp.status == 200
-           and (resp.body or ""):find("%Wwindow%.opener%.top%.location%s*=%s*window%.opener%.top%.location%.pathname%s*;")
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(path, "properties/authentication/login.php"))
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {action="/userpost/xerox%.set$"})
+    if not form then return false end
+    form.webUsername = user
+    form.webPassword = pass
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "userpost/xerox.set"),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 200
+           and (resp2.body or ""):find("%Wwindow%.opener%.top%.location%s*=%s*window%.opener%.top%.location%.pathname%s*;")
   end
 })
 
