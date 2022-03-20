@@ -3127,24 +3127,6 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "ASUS TM router",
-  cpe = "cpe:/h:asus:tm-*",
-  category = "routers",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    return (http_auth_realm(response) or ""):find("^TM%-%u[%u%d]+$")
-  end,
-  login_combos = {
-    {username = "admin", password = "password"}
-  },
-  login_check = function (host, port, path, user, pass)
-    return try_http_auth(host, port, path, user, pass, false)
-  end
-})
-
-table.insert(fingerprints, {
   name = "ASUS router",
   category = "routers",
   paths = {
@@ -3161,6 +3143,24 @@ table.insert(fingerprints, {
   end,
   login_combos = {
     {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "ASUS TM router",
+  cpe = "cpe:/h:asus:tm-*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return (http_auth_realm(response) or ""):find("^TM%-%u[%u%d]+$")
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
