@@ -10873,6 +10873,37 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Xerox SyncThru",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and (response.body or ""):find("RedirectToSWS()", 1, true)) then
+      return false
+    end
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, "sws/index.html"))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("CentreWare", 1, true)
+           and resp.body:lower():find("<title>[^<]-%f[%w]centreware%f[%W]")
+  end,
+  login_combos = {
+    {username = "admin", password = "1111"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local auth = "Basic " .. base64.enc(user .. ":" .. pass)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "sws/app/gnb/login/login.jsp"),
+                                 nil, {Authentication=auth})
+    return resp.status == 200
+           and (resp.body or ""):find("%Wsuccess%s*:%s*true%W")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Xerox AltaLink",
   cpe = "cpe:/o:xerox:altalink_*",
   category = "printer",
@@ -10908,7 +10939,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Xerox CentreWare (var.1)",
+  name = "Xerox CentreWare",
   category = "printer",
   paths = {
     {path = "/"}
@@ -10935,37 +10966,6 @@ table.insert(fingerprints, {
                                   {cookies=resp1.cookies}, form)
     return resp2.status == 200
            and (resp2.body or ""):find("%Wwindow%.opener%.top%.location%s*=%s*window%.opener%.top%.location%.pathname%s*;")
-  end
-})
-
-table.insert(fingerprints, {
-  name = "Xerox CentreWare (var.2)",
-  category = "printer",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    if not (response.status == 200
-           and (response.body or ""):find("RedirectToSWS()", 1, true)) then
-      return false
-    end
-    local resp = http_get_simple(host, port,
-                                url.absolute(path, "sws/index.html"))
-    return resp.status == 200
-           and resp.body
-           and resp.body:find("CentreWare", 1, true)
-           and resp.body:lower():find("<title>[^<]-%f[%w]centreware%f[%W]")
-  end,
-  login_combos = {
-    {username = "admin", password = "1111"}
-  },
-  login_check = function (host, port, path, user, pass)
-    local auth = "Basic " .. base64.enc(user .. ":" .. pass)
-    local resp = http_post_simple(host, port,
-                                 url.absolute(path, "sws/app/gnb/login/login.jsp"),
-                                 nil, {Authentication=auth})
-    return resp.status == 200
-           and (resp.body or ""):find("%Wsuccess%s*:%s*true%W")
   end
 })
 
