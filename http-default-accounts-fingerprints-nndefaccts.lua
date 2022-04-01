@@ -3127,7 +3127,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "ASUS router",
+  name = "ASUS router (basic auth)",
   category = "routers",
   paths = {
     {path = "/"}
