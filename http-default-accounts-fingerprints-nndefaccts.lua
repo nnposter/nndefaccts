@@ -3127,6 +3127,47 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "ASUS router",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and response.body
+           and response.body:find("%Wtop%.location%.href%s*=%s*(['\"])[^'\"]-/Main_Login%.asp%1")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "Main_Login.asp"))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("ASUS", 1, true)
+           and get_tag(resp.body, "input", {name="^login_authorization$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local murl = url.absolute(path, "Main_Login.asp")
+    local resp1 = http_get_simple(host, port, murl)
+    if resp1.status ~= 200 then return false end
+    local form = get_form_fields(resp1.body, {action="^login%.cgi$"})
+    if not form then return false end
+    form.next_page = "index.asp"
+    form.login_authorization = base64.enc(user .. ":" .. pass)
+    form.login_username = nil
+    form.login_passwd = nil
+    form.captcha_text = nil
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=murl}))}
+    local resp2 = http_post_simple(host, port, url.absolute(path, "login.cgi"),
+                                  {header=header}, form)
+    return resp2.status == 200
+           and get_cookie(resp2, "asus_token", "^%w+$")
+           and get_refresh_url(resp2.body or "")
+    end
+})
+
+table.insert(fingerprints, {
   name = "ASUS router (basic auth)",
   category = "routers",
   paths = {
