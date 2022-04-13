@@ -3617,6 +3617,37 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "TP-Link DOCSIS modem",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find(".tp-link.", 1, true)
+           and get_tag(response.body, "a", {href="^https?://www%.tp%-link%.com/?$"})
+           and get_tag(response.body, "form", {action="/goform/login$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {loginUsername=user,
+                  loginPassword=pass,
+                  forbidTime="0",
+                  authTime="0"}
+    local cookie = "Authorization=Basic " .. base64.enc(user .. ":" .. pass)
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=url.absolute(path, "login.asp")}))}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "goform/login"),
+                                 {cookies=cookie, header=header}, form)
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/index%.htm$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "BEC ADSL router",
   category = "routers",
   paths = {
