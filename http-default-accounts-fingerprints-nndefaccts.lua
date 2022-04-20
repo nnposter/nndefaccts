@@ -6865,6 +6865,25 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "OEM Mini_http IP Camera, DVR",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return (response.header["server"] or ""):find("^mini_httpd/%d+%.%d+")
+           and http_auth_realm(response) == "."
+  end,
+  login_combos = {
+    {username = "admin", password = "123456"},
+    {username = "root",  password = "icatch99"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "IPCC P2P Camera",
   category = "security",
   paths = {
