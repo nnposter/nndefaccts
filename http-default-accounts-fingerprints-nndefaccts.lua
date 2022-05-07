@@ -5948,6 +5948,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Juniper Web Device Manager",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:lower():find("juniper", 1, true)
+           and get_tag(response.body, "form", {action="/login$"})
+  end,
+  login_combos = {
+    {username = "root", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {login="login",
+                  username=user,
+                  password=pass}
+    local resp = http_post_simple(host, port, url.absolute(path, "login"),
+                                 nil, form)
+    return resp.status == 200
+           and (resp.body or ""):match("%Wvar%s+user_name%s*=%s*['\"](.-)['\"]") == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "F5 TMOS",
   cpe = "cpe:/o:f5:tmos",
   category = "routers",
