@@ -9621,6 +9621,38 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Trane Tracer SC",
+  cpe = "cpe:/a:trane:tracer_sc",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not ((response.status == 301 or response.status == 302)
+           and (response.header["location"] or ""):find("/hui/index%.html$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "hui/index.html"))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("Tracer SC", 1, true)
+           and resp.body:find("%Whui%.bootstrap%.logon%(")
+           and get_tag(resp.body, "script", {src="/hui/bootstrap%.js$"})
+  end,
+  login_combos = {
+    {username = "Trane", password = "Tracer"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local creds = {username = "$" .. base64.enc(user),
+                   password = base64.enc(pass),
+                   digest = true}
+    local resp = http_post_simple(host, port, url.absolute(path, "evox"),
+                                 {auth=creds}, '<obj is="obix:Nil" />')
+    return resp.status == 200
+  end
+})
+
+table.insert(fingerprints, {
   name = "Adcon Telemetry Gateway",
   category = "industrial",
   paths = {
