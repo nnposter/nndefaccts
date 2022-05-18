@@ -3706,6 +3706,39 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "DrayTek Vigor",
+  cpe = "cpe:/o:draytek:vigor_*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = response.header["location"] or ""
+    if not (response.status == 302 and loc:find("/weblogin%.htm$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, loc)
+    return resp.status == 200
+           and resp.body
+           and resp.body:find('frmSub[0].name="aa"', 1, true)
+           and resp.body:lower():find("<title>vigor login page</title>", 1, true)
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {aa=base64.enc(user),
+                  ab=base64.enc(pass)}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "cgi-bin/wlogin.cgi"),
+                                 nil, form)
+    return resp.status == 302
+           and resp.header["location"] == "/"
+           and get_cookie(resp, "SESSION_ID_VIGOR", "^%x+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "iBall Baton",
   category = "routers",
   paths = {
