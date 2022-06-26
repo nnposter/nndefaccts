@@ -9586,6 +9586,37 @@ table.insert(fingerprints, {
 --Industrial systems
 ---
 table.insert(fingerprints, {
+  name = "ScadaBR",
+  category = "industrial",
+  paths = {
+    {path = "/"},
+    {path = "/ScadaBR/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("ScadaBR", 1, true)
+           and get_tag(response.body, "meta", {name="^DESCRIPTION$", content="^ScadaBR Software$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_post_simple(host, port, url.absolute(path, "login.htm"),
+                                  nil, {username=user,password=pass})
+    local loc = (resp1.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (resp1.status == 302 and loc:find("%.shtm%f[;\0]")) then
+      return false
+    end
+    local resp2 = http_get_simple(host, port, url.absolute(path, loc))
+    return resp2.status == 200
+           and resp2.body
+           and resp2.body:find("logout.htm", 1, true)
+           and get_tag(resp2.body, "a", {href="^logout%.htm$"})
+  end
+})
+
+table.insert(fingerprints, {
   name = "Schneider Modicon Web",
   category = "industrial",
   paths = {
