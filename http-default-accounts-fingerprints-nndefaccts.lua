@@ -9485,6 +9485,23 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Streaming Media System",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return http_auth_realm(response) == "Smart Home And Intercom System"
+  end,
+  login_combos = {
+    {username = "admin", password = "123456"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Siedle Door Controller",
   category = "security",
   paths = {
