@@ -10247,6 +10247,30 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton Power Xpert Meter (var.1)",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Eaton Power Xpert Meter 2000", 1, true)
+           and response.body:lower():find("<title>%s*eaton power xpert meter 2000%s*<")
+           and get_tag(response.body, "embed", {code="^com%.eaton%.ngmp%.FullVgaApplet%.class$"})
+           and get_tag(response.body, "a", {href="%f[^/\0]content/index%.shtml$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "user",  password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "content/index.shtml"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "CS121 UPS Web/SNMP Manager",
   category = "industrial",
   paths = {
