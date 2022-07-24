@@ -10271,6 +10271,49 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton Managed ePDU",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find("Eaton", 1, true)
+           and response.body:lower():find("<title>%s*eaton%W")
+           and get_tag(response.body, "script", {src="/eaton/js/Nemo%.js$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "ws/gateway?")
+    local form1 = stdnse.output_table()
+    form1.page = "cgi_challenge"
+    form1.login = user
+    form1._dc = math.floor(stdnse.clock_ms())
+    local resp1 = http_get_simple(host, port, lurl .. url.build_query(form1))
+    local nonce = (resp1.body or ""):match("^%s*['\"](.-)['\"]%s*$")
+    if not (resp1.status == 200 and nonce) then return false end
+    local hashlen = 64
+    if #nonce > hashlen then
+      nonce = openssl.sha1(nonce)
+    end
+    nonce = nonce .. ("\0"):rep(hashlen - #nonce)
+    local form2 = stdnse.output_table()
+    form2.page = "cgi_authentication"
+    form2.login = user
+    form2.password = stdnse.tohex(openssl.hmac("SHA1", nonce, pass)):lower()
+    form2._dc = math.floor(stdnse.clock_ms())
+    local resp2 = http_get_simple(host, port, lurl .. url.build_query(form2))
+    if not (resp2.status == 200 and resp2.body) then return false end
+    local jstatus, jout = json.parse(resp2.body:gsub("'", "\""))
+    return jstatus and type(jout) == "table" and type(jout[1]) == "number" and jout[2] == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "CS121 UPS Web/SNMP Manager",
   category = "industrial",
   paths = {
