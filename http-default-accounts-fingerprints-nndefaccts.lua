@@ -10247,6 +10247,38 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Liebert IntelliSlot",
+  cpe = "cpe:/o:vertiv:liebert_intellislot_firmware",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and response.body
+           and response.body:find("web/initialize.htm", 1, true)
+           and response.body:find("%Wdocument%.location%s*=%s*(['\"])web/initialize%.htm%1")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "protected/"))
+    return resp.status == 401 and http_auth_realm(resp) == "Unity"
+  end,
+  login_combos = {
+    {username = "Liebert", password = "Liebert"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurls = {"protected/session/unityLogin.htm?devId=4",
+                   "protected/getAccess.htm?devId=0"}
+    for _, lurl in ipairs(lurls) do
+      if try_http_auth(host, port, url.absolute(path, lurl), user, pass, false) then
+        return true
+      end
+    end
+    return false
+  end
+})
+
+table.insert(fingerprints, {
   name = "Eaton Power Xpert Meter (var.1)",
   category = "industrial",
   paths = {
