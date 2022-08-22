@@ -11543,16 +11543,23 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "EFI Fiery Webtools",
+  name = "EFI Fiery Webtools (var.1)",
   category = "printer",
   paths = {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200
-           and (response.header["content-location"] or ""):find("^redirect%.html%.")
-           and response.body
-           and get_refresh_url(response.body, "^wt2parser%.cgi%?home_%w+$")
+    if not (response.status == 200
+           and (response.header["content-location"] or ""):find("^redirect%.html%.")) then
+      return false
+    end
+    local rurl = get_refresh_url(response.body or "", "^wt2parser%.cgi%?home_%a+$")
+    if not rurl then return false end
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, rurl:gsub("home_", "config_")))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("=%s*window%.open%((['\"])wt2parser%.cgi%?cfgsetup_%a+%1")
   end,
   login_combos = {
     {username = "Administrator", password = ""},
@@ -11587,6 +11594,47 @@ table.insert(fingerprints, {
                                  {header=header}, soapmsg)
     return resp.status == 200
            and (resp.body or ""):find('<result xsi:type="xsd:boolean">true</result>', 1, true)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "EFI Fiery Webtools (var.2)",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+           and (response.header["content-location"] or ""):find("^redirect%.html%.")) then
+      return false
+    end
+    local rurl = get_refresh_url(response.body or "")
+    if not (rurl == "wt4/home"
+             or (rurl or ""):find("^wt2parser%.cgi%?home_%a+$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "wt4/login?lang=en"))
+    return resp.status == 200
+           and resp.body
+           and get_tag(resp.body, "input", {type="^hidden$", name="^authenticity_token$"})
+  end,
+  login_combos = {
+    {username = "Administrator", password = ""},
+    {username = "Administrator", password = "Fiery.1"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, url.absolute(path, "wt4/login?lang=en"))
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local token = get_tag(resp1.body, "input", {type="^hidden$", name="^authenticity_token$", value=""})
+    if not token then return false end
+    local form = {user_name=user,
+                  password=pass,
+                  authenticity_token=token.value}
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "wt4/login/do_login"),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 302
+           and (resp2.header["location"] or ""):find("/wt4/configure$")
   end
 })
 
