@@ -1953,6 +1953,41 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Attivo ACM/BOTsink",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and get_cookie(response, "XID", "^%w+$")
+           and response.body
+           and response.body:find("AUI-login", 1, true)
+           and get_tag(response.body, "body", {class="%f[%w]AUI%-Login%f[%W]"})
+  end,
+  login_combos = {
+    {username = "admin", password = "Attivo1$"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local token = get_tag(resp1.body, "meta", {name="^_csrf$", content="^%x+$"})
+    if not token then return false end
+    local header = {["x-csrf-token"]=token.content,
+                    ["Content-Type"]="application/json"}
+    local jin = {username=user, password=base64.enc(pass):reverse()}
+    json.make_object(jin)
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "api/webauth/login"),
+                                  {cookies=resp1.cookies, header=header},
+                                  json.generate(jin))
+    if not (resp2.status == 200 and resp2.body) then return false end
+    local jstatus, jout = json.parse(resp2.body)
+    return jstatus and jout.username == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sagitta Hashstack",
   category = "web",
   paths = {
