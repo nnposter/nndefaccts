@@ -10314,6 +10314,30 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton Power Xpert Gateway (var.1)",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 302
+           and (response.header["location"] or ""):find("/content/?$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "content/"))
+    return http_auth_realm(resp) == "Power Xpert"
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "user",  password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "content/"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Eaton Power Xpert Meter (var.1)",
   category = "industrial",
   paths = {
