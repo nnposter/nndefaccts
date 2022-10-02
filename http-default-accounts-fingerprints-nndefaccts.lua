@@ -10282,6 +10282,31 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Lutron HomeWorks QS",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("LUTRON", 1, true)
+           and get_tag(response.body, "form", {name="^input$", action="^login$"})
+  end,
+  login_combos = {
+    {username = "lutron", password = "lutron"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {login=user,
+                  password=pass}
+    local resp = http_get_simple(host, port,
+                                url.absolute(path, "login?" .. url.build_query(form)))
+    return resp.status == 200
+           and get_tag(resp.body, "a", {href="/DbXmlInfo.xml$"})
+  end
+})
+
+table.insert(fingerprints, {
   name = "Liebert IntelliSlot",
   cpe = "cpe:/o:vertiv:liebert_intellislot_firmware",
   category = "industrial",
