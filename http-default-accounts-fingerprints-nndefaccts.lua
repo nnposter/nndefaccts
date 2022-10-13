@@ -10430,6 +10430,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton Monitored ePDU",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Eaton Monitored ePDU", 1, true)
+           and response.body:lower():find("<title>%s*eaton monitored epdu%s*<")
+           and get_tag(response.body, "a", {href="/admin/index%.zhtml$"})
+  end,
+  login_combos = {
+    {username = "Admin", password = "etn"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "admin/index.zhtml"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "CS121 UPS Web/SNMP Manager",
   category = "industrial",
   paths = {
