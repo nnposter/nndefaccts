@@ -10363,6 +10363,29 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton Power Xpert Gateway (var.2)",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Eaton Power Xpert Gateway", 1, true)
+           and response.body:lower():find("<title>%s*eaton power xpert gateway%s*<")
+           and get_refresh_url(response.body, "/content/$")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "user",  password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "content/"),
+                        user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Eaton Power Xpert Meter (var.1)",
   category = "industrial",
   paths = {
