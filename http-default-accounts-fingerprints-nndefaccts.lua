@@ -1460,6 +1460,165 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Pentaho Admin Console",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response)
+    return (realm == "Pentaho" or realm == "Pentaho Enterprise Console")
+           and (response.header["server"] or ""):find("^Jetty%f[%W]")
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Pentaho User Console",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Pentaho", 1, true)
+           and response.body:lower():find("<title>%s*pentaho business analytics%s*</title>")
+           and get_refresh_url(response.body, "/pentaho/?$")
+  end,
+  login_combos = {
+    {username = "admin", password = "password"},
+    {username = "joe",   password = "password"},
+    {username = "suzy",  password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {j_username=user,
+                  j_password=pass,
+                  locale="en_US"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "pentaho/j_spring_security_check"),
+                                 nil, form)
+    local loc = resp.header["location"] or ""
+    return resp.status == 302
+           and (loc:find("/pentaho/Home%f[;?\0]")
+             or loc:find("/pentaho/index%.jsp%f[?\0]"))
+  end
+})
+
+table.insert(fingerprints, {
+  name = "ComfortableMexicanSofa",
+  category = "web",
+  paths = {
+    {path = "/admin/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 302 and response.body) then return false end
+    local loc = response.header["location"] or ""
+    local _, pos = loc:find(url.absolute(path, "sites/"), 1, true)
+    if not pos then return false end
+    loc = loc:sub(pos)
+    if not (loc == "/new" or loc:find("^/%d+/")) then return false end
+    for _, ck in ipairs(response.cookies or {}) do
+      if ck.name:find("_session$") then return ck.value:find("%-%-%x+$") end
+    end
+    return false
+  end,
+  login_combos = {
+    {username = "username", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "sites/new"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Hippo CMS",
+  category = "web",
+  paths = {
+    {path = "/"},
+    {path = "/cms/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("hippo-login", 1, true)
+           and get_tag(response.body, "input", {name="^id2_hf_0$"})
+  end,
+  login_combos = {
+    {username = "admin",  password = "admin"},
+    {username = "editor", password = "editor"},
+    {username = "author", password = "author"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl;
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local submit = get_tag(resp1.body, "input", {name="^:submit$", onclick=""})
+    if submit then
+      local qry = submit.onclick:match("=%s*wicketSubmitFormById%(['\"]id%d+['\"],%s*['\"](.-)['\"]")
+      if not qry then return false end
+      lurl = xmldecode(qry) .. "&random=" .. math.random()
+    else
+      local frm = get_tag(resp1.body, "form", {name="^signInForm$", action=""})
+      if not frm then return false end
+      lurl = frm.action
+    end
+    local form = {id2_hf_0="",
+                  username=user,
+                  password=pass,
+                  locale="en",
+                  [":submit"]="log in"}
+    local resp2 = http_post_simple(host, port, url.absolute(path, lurl),
+                                  {cookies=resp1.cookies}, form)
+    return resp2.status == 302
+           and (resp2.header["location"] or ""):sub(-#path) == path
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Nuxeo Platform",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 200
+              and response.body
+              and response.body:find("/nuxeo", 1, true)
+              and get_refresh_url(response.body, "/nuxeo/?$")
+            or response.status == 302
+              and (response.header["location"] or ""):find("/nuxeo/$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "nuxeo/"))
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/nuxeo/nxstartup%.faces$")
+  end,
+  login_combos = {
+    {username = "Administrator", password = "Administrator"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {user_name=user,
+                  user_password=pass,
+                  requestedUrl="",
+                  forceAnonymousLogin="",
+                  form_submitted_marker="",
+                  Submit="Log in"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "nuxeo/nxstartup.faces"),
+                                 nil, form)
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/nuxeo/nxpath/default[/@]")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Opencast Matterhorn",
   category = "web",
   paths = {
@@ -2042,165 +2201,6 @@ table.insert(fingerprints, {
                                   {username=user, userpwd=pass})
     return resp2.status == 200
            and get_tag(resp2.body or "", "frame", {src="/csl/menu$"})
-  end
-})
-
-table.insert(fingerprints, {
-  name = "ComfortableMexicanSofa",
-  category = "web",
-  paths = {
-    {path = "/admin/"}
-  },
-  target_check = function (host, port, path, response)
-    if not (response.status == 302 and response.body) then return false end
-    local loc = response.header["location"] or ""
-    local _, pos = loc:find(url.absolute(path, "sites/"), 1, true)
-    if not pos then return false end
-    loc = loc:sub(pos)
-    if not (loc == "/new" or loc:find("^/%d+/")) then return false end
-    for _, ck in ipairs(response.cookies or {}) do
-      if ck.name:find("_session$") then return ck.value:find("%-%-%x+$") end
-    end
-    return false
-  end,
-  login_combos = {
-    {username = "username", password = "password"}
-  },
-  login_check = function (host, port, path, user, pass)
-    return try_http_auth(host, port, url.absolute(path, "sites/new"),
-                        user, pass, false)
-  end
-})
-
-table.insert(fingerprints, {
-  name = "Hippo CMS",
-  category = "web",
-  paths = {
-    {path = "/"},
-    {path = "/cms/"}
-  },
-  target_check = function (host, port, path, response)
-    return response.status == 200
-           and response.body
-           and response.body:find("hippo-login", 1, true)
-           and get_tag(response.body, "input", {name="^id2_hf_0$"})
-  end,
-  login_combos = {
-    {username = "admin",  password = "admin"},
-    {username = "editor", password = "editor"},
-    {username = "author", password = "author"}
-  },
-  login_check = function (host, port, path, user, pass)
-    local lurl;
-    local resp1 = http_get_simple(host, port, path)
-    if not (resp1.status == 200 and resp1.body) then return false end
-    local submit = get_tag(resp1.body, "input", {name="^:submit$", onclick=""})
-    if submit then
-      local qry = submit.onclick:match("=%s*wicketSubmitFormById%(['\"]id%d+['\"],%s*['\"](.-)['\"]")
-      if not qry then return false end
-      lurl = xmldecode(qry) .. "&random=" .. math.random()
-    else
-      local frm = get_tag(resp1.body, "form", {name="^signInForm$", action=""})
-      if not frm then return false end
-      lurl = frm.action
-    end
-    local form = {id2_hf_0="",
-                  username=user,
-                  password=pass,
-                  locale="en",
-                  [":submit"]="log in"}
-    local resp2 = http_post_simple(host, port, url.absolute(path, lurl),
-                                  {cookies=resp1.cookies}, form)
-    return resp2.status == 302
-           and (resp2.header["location"] or ""):sub(-#path) == path
-  end
-})
-
-table.insert(fingerprints, {
-  name = "Nuxeo Platform",
-  category = "web",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    if not (response.status == 200
-              and response.body
-              and response.body:find("/nuxeo", 1, true)
-              and get_refresh_url(response.body, "/nuxeo/?$")
-            or response.status == 302
-              and (response.header["location"] or ""):find("/nuxeo/$")) then
-      return false
-    end
-    local resp = http_get_simple(host, port, url.absolute(path, "nuxeo/"))
-    return resp.status == 302
-           and (resp.header["location"] or ""):find("/nuxeo/nxstartup%.faces$")
-  end,
-  login_combos = {
-    {username = "Administrator", password = "Administrator"}
-  },
-  login_check = function (host, port, path, user, pass)
-    local form = {user_name=user,
-                  user_password=pass,
-                  requestedUrl="",
-                  forceAnonymousLogin="",
-                  form_submitted_marker="",
-                  Submit="Log in"}
-    local resp = http_post_simple(host, port,
-                                 url.absolute(path, "nuxeo/nxstartup.faces"),
-                                 nil, form)
-    return resp.status == 302
-           and (resp.header["location"] or ""):find("/nuxeo/nxpath/default[/@]")
-  end
-})
-
-table.insert(fingerprints, {
-  name = "Pentaho Admin Console",
-  category = "web",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    local realm = http_auth_realm(response)
-    return (realm == "Pentaho" or realm == "Pentaho Enterprise Console")
-           and (response.header["server"] or ""):find("^Jetty%f[%W]")
-  end,
-  login_combos = {
-    {username = "admin", password = "password"}
-  },
-  login_check = function (host, port, path, user, pass)
-    return try_http_auth(host, port, path, user, pass, false)
-  end
-})
-
-table.insert(fingerprints, {
-  name = "Pentaho User Console",
-  category = "web",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    return response.status == 200
-           and response.body
-           and response.body:find("Pentaho", 1, true)
-           and response.body:lower():find("<title>%s*pentaho business analytics%s*</title>")
-           and get_refresh_url(response.body, "/pentaho/?$")
-  end,
-  login_combos = {
-    {username = "admin", password = "password"},
-    {username = "joe",   password = "password"},
-    {username = "suzy",  password = "password"}
-  },
-  login_check = function (host, port, path, user, pass)
-    local form = {j_username=user,
-                  j_password=pass,
-                  locale="en_US"}
-    local resp = http_post_simple(host, port,
-                                 url.absolute(path, "pentaho/j_spring_security_check"),
-                                 nil, form)
-    local loc = resp.header["location"] or ""
-    return resp.status == 302
-           and (loc:find("/pentaho/Home%f[;?\0]")
-             or loc:find("/pentaho/index%.jsp%f[?\0]"))
   end
 })
 
