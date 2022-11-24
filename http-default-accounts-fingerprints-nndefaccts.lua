@@ -2147,6 +2147,40 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Attivo ThreatDirectVM",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and get_cookie(response, "PHPSESSID", "^%w+$")
+           and response.body
+           and response.body:find("AUI-login", 1, true)
+           and get_tag(response.body, "body", {class="%f[%w]AUI%-Login%f[%W]"})
+  end,
+  login_combos = {
+    {username = "admin", password = "Attivo1$"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local token = get_tag(resp1.body, "meta", {name="^_csrf$", content="^%x+$"})
+    if not token then return false end
+    local form = {api="login",
+                  username=user,
+                  password=base64.enc(pass):reverse()}
+    local header = {["X-CSRF-TOKEN"]=token.content}
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "loginval.php"),
+                                  {cookies=resp1.cookies, header=header}, form)
+    if not (resp2.status == 200 and resp2.body) then return false end
+    local jstatus, jout = json.parse(resp2.body)
+    return jstatus and jout.authStatus == true
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sagitta Hashstack",
   category = "web",
   paths = {
