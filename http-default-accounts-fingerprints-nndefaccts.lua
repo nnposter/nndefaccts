@@ -4773,6 +4773,35 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "ZyXEL NXC",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("fake_safari_username", 1, true)
+           and get_tag(response.body, "input", {name="^loginTosslvpn$"})
+  end,
+  login_combos = {
+    {username = "zyfwp", password = "PrOw!aN_fXp"},
+    {username = "admin", password = "1234"},
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {fake_safari_username="",
+                  fake_safari_password="",
+                  username=user,
+                  pwd=pass,
+                  password=pass,
+                  f_ui_lang=""}
+    local resp = http_post_simple(host, port, path, nil, form)
+    return resp.status == 302
+           and get_cookie(resp, "authtok", "^[%w+-]+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Adtran NetVanta",
   cpe = "cpe:/h:adtran:netvanta_*",
   category = "routers",
