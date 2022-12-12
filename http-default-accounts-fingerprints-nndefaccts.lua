@@ -1426,6 +1426,40 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "webMethods Integration Server",
+  cpe = "cpe:/a:softwareag:webmethods",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and get_cookie(response, "ssnid", "^%x+$")
+           and response.body
+           and get_tag(response.body, "div", {id="^integration%-admin%-ui%-container$"})
+  end,
+  login_combos = {
+    {username = "Administrator", password = "manage"},
+    {username = "Developer",     password = "isdev"},
+    {username = "Replicator",    password = "iscopy"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json;charset=utf-8"}
+    local jin = {username=user, password=pass}
+    json.make_object(jin)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "invoke/wm.server/login"),
+                                 {header=header}, json.generate(jin))
+    if not (resp.status == 200 and get_cookie(resp, "ssnid", "^%x+$")) then
+      return false
+    end
+    local jstatus, jout = json.parse(resp.body)
+    return jstatus and jout.username == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "Apache Ofbiz",
   cpe = "cpe:/a:apache:ofbiz",
   category = "web",
