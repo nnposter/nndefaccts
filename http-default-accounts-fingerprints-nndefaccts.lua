@@ -2263,7 +2263,7 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     local resp1 = http_get_simple(host, port, path)
-    if not (resp1.status == 200) then return false end
+    if resp1.status ~= 200 then return false end
     local resp2 = http_post_simple(host, port, url.absolute(path, "csl/check"),
                                   {cookies=resp1.cookies},
                                   {username=user, userpwd=pass})
@@ -3551,7 +3551,7 @@ table.insert(fingerprints, {
   login_check = function (host, port, path, user, pass)
     local lurl = url.absolute(path, "cgi-bin/webproc")
     local resp1 = http_get_simple(host, port, lurl)
-    if not (resp1.status == 200) then return false end
+    if resp1.status ~= 200 then return false end
     local form = {getpage="html/index.html",
                   errorpage="html/main.html",
                   ["var:menu"]="setup",
