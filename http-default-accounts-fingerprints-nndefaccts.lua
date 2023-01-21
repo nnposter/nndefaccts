@@ -1460,6 +1460,31 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "My webMethods Server",
+  cpe = "cpe:/a:softwareag:webmethods",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("webMethods", 1, true)
+           and get_tag(response.body, "input", {id="^jsfwmp.*:passwordInput$"})
+  end,
+  login_combos = {
+    {username = "Administrator", password = "manage"},
+    {username = "SysAdmin",      password = "manage"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port, path, nil,
+                                 {username=user, password=pass})
+    return resp.status == 302
+           and (resp.header["location"] or ""):sub(-#path) == path
+  end
+})
+
+table.insert(fingerprints, {
   name = "Apache Ofbiz",
   cpe = "cpe:/a:apache:ofbiz",
   category = "web",
