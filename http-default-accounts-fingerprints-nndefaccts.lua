@@ -3776,6 +3776,44 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Buffalo AirStation",
+  cpe = "cpe:/h:buffalotech:airstation_*",
+  category = "routers",
+  paths = {
+    {path = "/login.html"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find("BUFFALO", 1, true)
+           and get_tag(response.body, "input", {name="^pws$"})
+           and get_tag(response.body, "img", {title="^spacer$", src="^data:"})
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local img = get_tag(resp1.body, "img", {title="^spacer$", src="^data:"})
+    if not img then return false end
+    local form ={name=user,
+                 pws=stdnse.tohex(openssl.md5(pass)),
+                 url=url.absolute(path, "./"),
+                 mobile=0,
+                 httoken=b64decode(img.src:sub(79))}
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=path}))}
+    local resp2 = http_post_simple(host, port, url.absolute(path, "login.cgi"),
+                                  {header=header}, form)
+    local loc = resp2.header["location"]
+    return resp2.status == 302
+           and (loc == form.url
+             or loc == url.absolute(path, "loginexclude.html"))
+  end
+})
+
+table.insert(fingerprints, {
   name = "BEC ADSL router",
   category = "routers",
   paths = {
