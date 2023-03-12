@@ -10467,6 +10467,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "BTECH S5 Battery Monitor",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("BTECH", 1, true)
+           and response.body:lower():find("<title>btech%W[^<]-%f[%w]s5 battery monitor")
+           and get_tag(response.body, "a", {href="/admin/index%.zhtml$"})
+  end,
+  login_combos = {
+    {username = "btech", password = "monitor"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "admin/index.zhtml"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Liebert IntelliSlot",
   cpe = "cpe:/o:vertiv:liebert_intellislot_firmware",
   category = "industrial",
