@@ -9760,6 +9760,36 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Vanderbilt Bright/Lite Blue",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Vanderbilt", 1, true)
+           and response.body:lower():find("<title>%s*vanderbilt %w+ blue%W")
+           and get_tag(response.body, "link", {href="/Site_SMS/Vshield_bbg%.png$"})
+  end,
+  login_combos = {
+    {username = "usr", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {debug=0,
+                  fldUserName=user,
+                  fldPassword=pass}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "Site_SMS/cgi-bin/process_login.cgi"),
+                                 nil, form)
+    local loc = resp.header["location"] or ""
+    return resp.status == 302
+           and (loc:find("/Site_SMS/SMS_Frameset%.html%?SessionId=%d+%f[&\0]")
+             or loc:find("/Site_SMS/SF_User_Login/User_Login_Page%.xml%?auth=41%f[&\0]"))
+  end
+})
+
+table.insert(fingerprints, {
   name = "Genetec Synergis",
   category = "security",
   paths = {
