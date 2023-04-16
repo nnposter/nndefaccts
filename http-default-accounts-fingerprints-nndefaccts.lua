@@ -6444,6 +6444,57 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "AudioCodes Mediant",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 203
+           and response.body
+           and response.body:find("hex_sha256", 1, true)
+           and get_tag(response.body, "form", {action="/UE/Login$"})
+  end,
+  login_combos = {
+    {username = "Admin", password = "Admin"},
+    {username = "User",  password = "User"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "UE/Login")
+    local form1 = stdnse.output_table()
+    form1.t = 1
+    form1.c0 = 0
+    form1.c1 = user
+    local resp1 = http_post_simple(host, port, lurl, nil, form1)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local hashfnc = function (...)
+                      local text = table.concat({...}, ":")
+                      return stdnse.tohex(openssl.digest("SHA256", text)):lower()
+                    end
+    local prms = {}
+    resp1.body:gsub("<(%a)>%s*(.-)%s*</%1>", function (k, v) prms[k] = v end)
+    if not (prms.s and prms.m) then return false end
+    local form2 = stdnse.output_table()
+    form2.t = 1
+    form2.s = prms.s
+    form2.c0 = 1
+    if prms.m == "0" then
+      if not prms.r then return false end
+      form2.c1 = hashfnc(user, prms.r, hashfnc(pass))
+    elseif prms.m == "2" then
+      form2.c1 = pass
+    else
+      if not prms.n then return false end
+      form2.c1 = hashfnc(hashfnc(pass, prms.n), prms.r)
+    end
+    local resp2 = http_post_simple(host, port, lurl, nil, form2)
+    return resp2.status == 200
+           and (resp2.body or ""):find("<login>success</login>", 1, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "AudioCodes Mediant (basic auth)",
   category = "voip",
   paths = {
