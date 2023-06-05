@@ -4899,6 +4899,35 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "ZyXEL VMG",
+  cpe = "cpe:/o:zyxel:vmg*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 401
+           and get_cookie(response, "Session", "^%d+$")
+           and response.body
+           and response.body:find("/js/zyxelhelp.js", 1, true)
+           and get_tag(response.body, "script", {src="/js/zyxelhelp%.js$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "1234"},
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 401 and get_cookie(resp1, "Session", "^%d+$")) then
+      return false
+    end
+    table.insert(resp1.cookies, {name = "Authentication", value = url.escape(base64.enc(user .. ":" .. pass))})
+    local resp2 = http_get_simple(host, port, url.absolute(path, "init"),
+                                 {cookies=resp1.cookies})
+    return resp2.status == 200
+  end
+})
+
+table.insert(fingerprints, {
   name = "Adtran NetVanta",
   cpe = "cpe:/h:adtran:netvanta_*",
   category = "routers",
