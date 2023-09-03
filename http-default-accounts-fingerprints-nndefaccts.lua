@@ -6960,6 +6960,24 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Polycom VVX (user)",
+  cpe = "cpe:/o:polycom:vvx_*",
+  category = "voip",
+  paths = {
+    {path = "/user/"}
+  },
+  target_check = function (host, port, path, response)
+    return (http_auth_realm(response) or ""):find("^user@VVX%s")
+  end,
+  login_combos = {
+    {username = "user", password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, true)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Teles Gateway",
   category = "voip",
   paths = {
