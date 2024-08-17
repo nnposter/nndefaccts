@@ -5403,6 +5403,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Digi ConnectPort (no auth)",
+  category = "routers",
+  paths = {
+    {path = "/login.htm"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 303
+           and (response.header["location"] or ""):find("/home%.htm$")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "home.htm"))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("ConnectPort", 1, true)
+           and resp.body:lower():find("<title>%s*connectport%W")
+           and get_tag(resp.body, "a", {href="/admin/logout%.htm$"})
+  end,
+  login_combos = {
+    {username = "", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    return true
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sea Tel MXP",
   category = "routers",
   paths = {
