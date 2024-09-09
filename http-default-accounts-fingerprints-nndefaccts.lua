@@ -11240,6 +11240,38 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Trimble 5.x",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Trimble", 1, true)
+           and response.body:find("%Wvar%s+trmbTop%s*=")
+           and get_tag(response.body, "link", {href="^CACHEDIR%d+/favicon%.ico$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "password"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http.get(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local link = get_tag(resp1.body, "link", {href="^CACHEDIR%d+/favicon%.ico$"})
+    if not link then return false end
+    local lurl = link.href:match("^.-/") .. "cgi-bin/login.xml?"
+    local form = {username=user,
+                  password=pass,
+                  t=math.floor(os.difftime(os.time(),os.time({year=1980,month=1,day=6})))}
+    local resp2 = http_get_simple(host, port,
+                                 url.absolute(path, lurl .. url.build_query(form)))
+    return resp2.status == 200
+           and (resp2.body or ""):lower():find("<cookie>[^<]*%f[%w]user=" .. user:lower() .. "%W")
+  end
+})
+
+table.insert(fingerprints, {
   name = "Deva Broadcast",
   category = "industrial",
   paths = {
