@@ -2550,28 +2550,6 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Cisco Linksys",
-  cpe = "cpe:/h:linksys:*",
-  category = "routers",
-  paths = {
-    {path = "/"}
-  },
-  target_check = function (host, port, path, response)
-    local realm = http_auth_realm(response) or ""
-    return realm:find("^Linksys %u[%u%d]+%s*$")
-           or realm:find("^WRT54GC%w*$")
-           or realm == "NR041"
-  end,
-  login_combos = {
-    {username = "", password = "admin"},
-    {username = "admin", password = "admin"},
-  },
-  login_check = function (host, port, path, user, pass)
-    return try_http_auth(host, port, path, user, pass, false)
-  end
-})
-
-table.insert(fingerprints, {
   name = "Cisco DPC3848VM",
   cpe = "cpe:/h:cisco:dpc3848vm",
   category = "routers",
@@ -2771,6 +2749,28 @@ table.insert(fingerprints, {
     return resp.status == 303
            and (get_cookie(resp, "euq_authenticated", "^%w+$")
              or get_cookie(resp, "authenticated", "^%w+$"))
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Linksys",
+  cpe = "cpe:/h:linksys:*",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local realm = http_auth_realm(response) or ""
+    return realm:find("^Linksys %u[%u%d]+%s*$")
+           or realm:find("^WRT54GC%w*$")
+           or realm == "NR041"
+  end,
+  login_combos = {
+    {username = "", password = "admin"},
+    {username = "admin", password = "admin"},
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
   end
 })
 
