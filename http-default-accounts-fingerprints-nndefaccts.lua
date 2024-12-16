@@ -9970,6 +9970,38 @@ table.insert(fingerprints, {
 --Industrial systems
 ---
 table.insert(fingerprints, {
+  name = "ABB Cylon Aspect",
+  cpe = "cpe:/o:abb:*",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Cylon", 1, true)
+           and response.body:lower():find("<title>cylon</title>", 1, true)
+           and get_tag(response.body, "img", {src="%.cylon%.png$"})
+           and get_tag(response.body, "input", {name="^f_pass$"})
+  end,
+  login_combos = {
+    {username = "guest", password = "guest"},
+    {username = "aamuser", password = "default"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {f_user=user,
+                  f_pass=pass,
+                  submit="Log In"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "validate/login.php"),
+                                 nil, form)
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/", 1, true)
+           and get_cookie(resp, "PHPSESSID", "^%w+$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "ScadaBR",
   category = "industrial",
   paths = {
