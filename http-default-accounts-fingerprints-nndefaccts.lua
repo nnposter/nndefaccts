@@ -10376,6 +10376,34 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Orpak SiteOmat",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("siteomat_global.js", 1, true)
+           and get_tag(response.body, "script", {src="/script/siteomat_global%.js"})
+           and response.body:find("%Wvar%s+win%s*=%s*open%((['\"])login%.htm%1")
+  end,
+  login_combos = {
+    {username = "Admin", password = "Admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {User=user,
+                  Password=pass,
+                  DBname="",
+                  loginbut="Login"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "dologin.htm"), nil, form)
+    return resp.status == 200
+           and get_tag(resp.body or "", "body", {onload="^CheckLogin%(1%)$"})
+  end
+})
+
+table.insert(fingerprints, {
   name = "ProMinent Controller",
   category = "industrial",
   paths = {
