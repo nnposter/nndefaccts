@@ -10674,6 +10674,59 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Alerton Building Suite 3",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (have_openssl
+           and response.status == 302
+           and (response.header["location"] or ""):find("/login%f[?\0]")
+           and get_cookie(response, "niagara_audit")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "login"))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("alerton", 1, true)
+           and get_tag(resp.body, "input", {id="^scheme$", type="^hidden$"})
+  end,
+  login_combos = {
+    {username = "LocalAdministrator", password = "pass"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "login")
+    local resp1 = http_get_simple(host, port, lurl)
+    if resp1.status ~= 200 then return false end
+    local scheme = get_tag(resp1.body or "", "input", {id="^scheme$", type="^hidden$"})
+    local token, cookies
+    if scheme.value == "cookieDigest" then
+      local header = {["Content-Type"] = "application/x-niagara-login-support"}
+      local resp2 = http_post_simple(host, port, lurl, {header=header},
+                                    "action=getnonce")
+      local nonce = resp2.body
+      if not (resp2.status == 200 and nonce) then return false end
+      local hashfnc = function (...)
+                        local text = table.concat({...}, ":")
+                        return stdnse.tohex(openssl.sha1(text)):lower()
+                      end
+      pass = stdnse.tohex(openssl.md5(pass .. user:upper())):lower()
+      token = {user, nonce, hashfnc(hashfnc(user, pass), nonce)}
+      cookies = resp2.cookies
+    else
+      token = {user, pass}
+      cookies = nil
+    end
+    local form = {username_zip="",
+                  token=base64.enc(table.concat(token, ":"))}
+    local resp = http_post_simple(host, port, lurl, {cookies=cookies}, form)
+    return resp.status == 302
+           and get_cookie(resp, "niagara_audit") == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "Lutron HomeWorks QS",
   category = "industrial",
   paths = {
