@@ -10877,6 +10877,44 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton Power Xpert Meter (var.2)",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Eaton Power Xpert Meter 2000", 1, true)
+           and response.body:lower():find("<title>%s*eaton power xpert meter 2000%s*<")
+           and response.body:find("%Wwindow%.location%s*=[^;<]-%+%s*(['\"])html5%1%s*;")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "user",  password = "user"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Content-Type"]="application/xhtml+xml;charset=utf-8;"}
+    local msg = [=[
+      <?xml version="1.0" encoding="utf-8"?>
+      <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+        <soapenv:Body>
+          <ns3:whoAmI xmlns:ns3="http://eaton.com/BACnetWSPlusPX">
+          </ns3:whoAmI>
+        </soapenv:Body>
+      </soapenv:Envelope>
+      ]=]
+    msg = msg:gsub("^%s+", ""):gsub("\n%s*", "")
+    local creds = {username = user, password = pass, digest = true}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "BACnetWSPlus/publisher.cgi"),
+                                 {header=header, auth=creds}, msg)
+    return resp.status == 200
+           and xmldecode((resp.body or ""):match("<nspx:whoAmIResponse><result>([^<]*)</result></nspx:whoAmIResponse>") or "") == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "Eaton Managed ePDU",
   category = "industrial",
   paths = {
