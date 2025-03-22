@@ -11374,6 +11374,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Atlas Solar Tracker",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Atlas Solar Tracker", 1, true)
+           and response.body:lower():find("<title>atlas solar tracker", 1, true)
+           and get_tag(response.body, "a", {href="/admin/index%.zhtml$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "atlassolar.gr"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "admin/index.zhtml"),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Trimble 4.x",
   category = "industrial",
   paths = {
