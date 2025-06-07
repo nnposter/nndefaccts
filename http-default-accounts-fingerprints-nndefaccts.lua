@@ -3814,6 +3814,41 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Arcadyan (Hughes HT2000)",
+  category = "routers",
+  paths = {
+    {path = "/login.htm"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find("Arcadyan", 1, true)
+           and response.body:find("HUGHES", 1, true)
+           and get_tag(response.body, "input", {name="^pws$"})
+           and get_tag(response.body, "img", {title="^spacer$", src="^data:"})
+  end,
+  login_combos = {
+    {username = "", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local img = get_tag(resp1.body, "img", {title="^spacer$", src="^data:"})
+    local nexturl = get_tag(resp1.body, "input", {name="^url$"})
+    if not (img and nexturl) then return false end
+    local form ={httoken=b64decode(img.src:sub(79)),
+                 url=nexturl.value .. "?t=" .. math.floor(stdnse.clock_ms()),
+                 pws=stdnse.tohex(openssl.md5(pass))}
+    local header = {["Referer"]=url.build(url_build_defaults(host, port, {path=path}))}
+    local resp2 = http_post_simple(host, port, url.absolute(path, "login.cgi"),
+                                  {header=header}, form)
+    return resp2.status == 302
+           and resp2.header["location"] == url.absolute(path, form.url)
+  end
+})
+
+table.insert(fingerprints, {
   name = "BEC ADSL router",
   category = "routers",
   paths = {
