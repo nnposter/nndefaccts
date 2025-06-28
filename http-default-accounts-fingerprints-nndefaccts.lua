@@ -3849,6 +3849,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Arcadyan (KPN, var.1)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Arcadyan", 1, true)
+           and response.body:find(">KPN<", 1, true)
+           and get_tag(response.body, "form", {action="/cgi%-bin/login%.exe$"})
+           and get_tag(response.body, "input", {name="^pws$"})
+  end,
+  login_combos = {
+    {username = "KPN", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "cgi-bin/login.exe"),
+                                 nil, {user=user,pws=pass})
+    return resp.status == 302
+           and (resp.header["location"] or ""):find("/index%.stm$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "BEC ADSL router",
   category = "routers",
   paths = {
