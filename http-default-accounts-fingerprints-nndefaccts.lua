@@ -3875,6 +3875,39 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Arcadyan (KPN, var.2)",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Arcadyan", 1, true)
+           and response.body:find("_httoken", 1, true)
+           and get_tag(response.body, "form", {action="/cgi%-bin/login%.exe$"})
+           and get_tag(response.body, "input", {name="^pws$"})
+  end,
+  login_combos = {
+    {username = "Admin", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, path)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local token = resp1.body:match("%Wvar%s+_httoken%s*=%s*['\"](%x+)")
+    if not token then return false end
+    local form = {httoken = token,
+                  user = user,
+                  pws = pass}
+    local resp2 = http_post_simple(host, port,
+                                  url.absolute(path, "cgi-bin/login.exe"),
+                                  nil, form)
+    return resp2.status == 302
+           and (resp2.header["location"] or ""):find("/index%.stm$")
+  end
+})
+
+table.insert(fingerprints, {
   name = "BEC ADSL router",
   category = "routers",
   paths = {
