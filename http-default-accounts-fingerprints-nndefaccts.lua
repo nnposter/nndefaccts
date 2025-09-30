@@ -9969,6 +9969,80 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Paradox IP Module",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = "login_page.html"
+    if not (have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find(lurl, 1, true)
+           and response.body:find("%Wtop%.location%.href%s*=%s*(['\"])login_page%.html%1")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, lurl))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("loginaff", 1, true)
+           and get_tag(resp.body, "script", {src="^commun%.js$"})
+  end,
+  login_combos = {
+    {username = "0000", password = "paradox"},
+    {username = "1234", password = "paradox"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local function rc4like (key, data)
+      local s = {}
+      for i = 0, 255 do
+        s[i] = i
+      end
+      local k = 0
+      for i = #key, 1, -1 do
+        local j = i - 1
+        k = (k + s[j] + key:byte(i, i)) % 256
+        s[j], s[k] = s[k], s[j]
+      end
+      k = 0
+      local out = {}
+      for i = 1, #data do
+        local j = (i - 1) % 256
+        k = (k + s[j]) % 256
+        s[j], s[k] = s[k], s[j]
+        table.insert(out, string.char(data:byte(i, i) ~ s[(s[j] + s[k]) % 256]))
+      end
+      return table.concat(out)
+    end
+    local resp1 = http_get_simple(host, port,
+                                 url.absolute(path, "login_page.html"))
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local session = resp1.body:match("%.innerHTML%s*=%s*loginaff%(%s*['\"]([^'\"]+)")
+    if not session then return false end
+    local spass = stdnse.tohex(openssl.md5(pass)):upper() .. session
+    local form = stdnse.output_table()
+    form.u = stdnse.tohex(rc4like(spass, user)):upper()
+    form.p = stdnse.tohex(openssl.md5(spass)):upper()
+    local lurl = "default.html?" .. url.build_query(form)
+    stdnse.sleep(6)
+    local resp2 = http_get_simple(host, port, url.absolute(path, lurl))
+    if resp2.status ~= 200
+       or (resp2.body or ""):find("%Wtop%.location%.href%s*=%s*(['\"])login_page%.html%1") then
+      return false
+    end
+    stdnse.sleep(11)
+    local resp3 = http_get_simple(host, port, url.absolute(path, "index.html"))
+    if not (resp3.status == 200
+           and get_tag(resp3.body or "", "frame", {src="^menu%.html$"})) then
+      return false
+    end
+    http_get_simple(host, port, url.absolute(path, "logout.html"))
+    return true
+  end
+})
+
+table.insert(fingerprints, {
   name = "Vanderbilt SPC",
   category = "security",
   paths = {
