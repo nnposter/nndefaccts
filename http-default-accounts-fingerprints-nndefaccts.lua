@@ -10610,6 +10610,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Sullair eConnect",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Sullair eConnect", 1, true)
+           and get_tag(response.body, "embed", {src="^splash%.swf$"})
+  end,
+  login_combos = {
+    {username = "admin", password = ""},
+    {username = "user",  password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, user),
+                        user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Emerson EC2",
   category = "industrial",
   paths = {
