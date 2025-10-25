@@ -11586,6 +11586,49 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "WeatherHawk IP",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("WeatherHawk", 1, true)
+           and response.body:find("%Wvar%s+cgiURL%s*=%s*(['\"])[^'\"]-/in_security%.cgi%?A=0%1")
+           and get_tag(response.body, "input", {name="^btnPassword$"})
+  end,
+  login_combos = {
+    {username = "", password = "hawkip"},
+  },
+  login_check = function (host, port, path, user, pass)
+    local opts = {scheme = "http", timeout = 10000}
+    local logouturl = url.absolute(path, "out_security.cgi?A=0")
+    http_get_simple(host, port, logouturl, opts)
+    local resp1 = http_get_simple(host, port, path, opts)
+    if not (resp1.status == 200
+           and get_tag(resp1.body or "", "input", {name="^btnPassword$", disabled=""})) then
+      stdnse.debug1("Forced logout failed; credentials cannot be tested")
+      return false
+    end
+    local qry = stdnse.output_table()
+    qry.A = 0
+    for i = 1, #pass do
+      qry[string.char(("A"):byte() + i)] = pass:byte(i, i)
+    end
+    local lurl = url.absolute(path, "in_security.cgi?" .. url.build_query(qry))
+    http_get_simple(host, port, lurl, opts)
+    local resp2 = http_get_simple(host, port, path, opts)
+    if not (resp2.status == 200
+           and get_tag(resp2.body or "", "input", {name="^btnPassword$", enabled=""})) then
+      return false
+    end
+    http_get_simple(host, port, logouturl, opts)
+    return true
+  end
+})
+
+table.insert(fingerprints, {
   name = "Trimble 4.x",
   category = "industrial",
   paths = {
