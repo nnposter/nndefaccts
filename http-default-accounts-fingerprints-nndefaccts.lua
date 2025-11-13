@@ -10165,8 +10165,8 @@ table.insert(fingerprints, {
 --Industrial systems
 ---
 table.insert(fingerprints, {
-  name = "ABB Cylon Aspect",
-  cpe = "cpe:/o:abb:*",
+  name = "ABB Aspect",
+  cpe = "cpe:/o:abb:aspect*",
   category = "industrial",
   paths = {
     {path = "/"}
@@ -10174,9 +10174,9 @@ table.insert(fingerprints, {
   target_check = function (host, port, path, response)
     return response.status == 200
            and response.body
-           and response.body:find("Cylon", 1, true)
-           and response.body:lower():find("<title>cylon</title>", 1, true)
-           and get_tag(response.body, "img", {src="%.cylon%.png$"})
+           and response.body:find("return chk_FORM(this)", 1, true)
+           and response.body:find("img/Header_Left_", 1, true)
+           and get_tag(response.body, "img", {src="^img/Header_Left_%u+%f[.].*%.png$"})
            and get_tag(response.body, "input", {name="^f_pass$"})
   end,
   login_combos = {
