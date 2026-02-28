@@ -6819,6 +6819,47 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Avaya Contact Center Select",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if response.status == 302
+       and response.header["location"] == "ie55.asp?Code=InvalidVersion" then
+      local header = {["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko"}
+      response = http_get_simple(host, port, path, {header=header})
+    end
+    return get_cookie(response, "UserNameFromSystemManager", "^$")
+           and (response.status == 302
+               and response.header["location"] == "CCMALogin/Home/Login"
+             or response.status == 200
+               and response.body
+               and response.body:find("%.location%.href%s*=%s*(['\"])[^'\"]-/CCMALogin/Home/Login%1"))
+  end,
+  login_combos = {
+    {username = "Administrator", password = "Administrator"},
+    {username = "reporting1",    password = "reporting1"},
+    {username = "reporting2",    password = "reporting2"},
+    {username = "accssync",      password = "accssync"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local lurl = url.absolute(path, "CCMALogin/Home/Login")
+    local resp1 = http_get_simple(host, port, lurl)
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local token = get_tag(resp1.body, "input", {type="^hidden$", name="^__RequestVerificationToken$", value=""})
+    local form = {__RequestVerificationToken=(token or {}).value,
+                  UserName=user,
+                  Password=pass,
+                  LoginBtn=""}
+    local resp2 = http_post_simple(host, port, lurl,
+                                  {cookies=resp1.cookies}, form)
+    return (resp2.status == 200 or resp2.status == 302)
+           and get_cookie(resp2, "UserName") == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "Cisco TelePresence",
   category = "voip",
   paths = {
