@@ -406,6 +406,7 @@ end
 --         A fields without values are assigned empty strings, just as if they
 --         were submitted
 ---
+local input_types = {hidden=1, text=1, password=1, email=1, tel=1, number=1}
 local function get_form_fields (html, criteria)
   if html and criteria then
     html = get_tag_html(html, "form", criteria)
@@ -413,8 +414,7 @@ local function get_form_fields (html, criteria)
   if not html then return end
   local form = stdnse.output_table()
   for input in get_tags(html, "input", {name=""}) do
-    local type = (input.type or "text"):lower()
-    if type == "hidden" or type == "text" or type == "password" then
+    if input_types[(input.type or "text"):lower()] then
       form[input.name] = input.value or ""
     end
   end
