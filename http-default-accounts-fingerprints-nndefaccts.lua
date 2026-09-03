@@ -10688,6 +10688,33 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Loytec L-VIS",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 302
+           and (response.header["location"] or ""):find("/webui/device_info/device_info$")
+           and response.header["server"] == "GoAhead-Webs"
+  end,
+  login_combos = {
+    {username = "admin", password = "loytec4u"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local form = {username_sel=user,
+                 username=user,
+                 password=pass,
+                 login="Login"}
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "webui/config/port"),
+                                 nil, form)
+    return resp.status == 200
+           and get_tag_html(resp.body or "", "span", {class="^navinfo_user$"}) == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "Adcon Telemetry Gateway",
   category = "industrial",
   paths = {
