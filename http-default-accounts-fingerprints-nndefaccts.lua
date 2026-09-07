@@ -10514,11 +10514,17 @@ table.insert(fingerprints, {
     {path = "/"}
   },
   target_check = function (host, port, path, response)
-    return response.status == 200
+    if not (response.status == 200
            and response.body
            and response.body:find("<app-root>", 1, true)
            and response.body:find("main", 1, true)
-           and get_tag(response.body, "script", {src="^main[-.]"})
+           and get_tag(response.body, "script", {src="^main[-.]"})) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "api/variant"))
+    return resp.status == 200
+           and (resp.header["content-type"] or ""):find("^application/json%f[;\0]")
+           and get_cookie(resp, "user_sid", "^s%%3A")
   end,
   login_combos = {
     {username = "admin", password = "cylonctl"},
