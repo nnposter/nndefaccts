@@ -11573,6 +11573,28 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Eaton UPS Web Card",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("Eaton", 1, true)
+           and response.body:lower():find("<title>%s*eaton [ua][pt]s web card%s*<")
+           and get_tag(response.body, "frame", {src="/ups_propf%.htm$"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "ups_cont.htm"),
+                        user, pass, "any")
+  end
+})
+
+table.insert(fingerprints, {
   name = "CS121 UPS Web/SNMP Manager",
   category = "industrial",
   paths = {
